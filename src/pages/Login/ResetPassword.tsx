@@ -3,8 +3,8 @@ import { View } from 'react-native';
 
 // import { Container } from './styles';
 
-const ResetPassword = () => {
+const ResetPassword: React.FC = () => {
   return <View />;
-}
+};
 
 export default ResetPassword;

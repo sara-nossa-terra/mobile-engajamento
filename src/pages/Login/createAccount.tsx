@@ -3,8 +3,8 @@ import { View } from 'react-native';
 
 // import { Container } from './styles';
 
-const CreateAccount = () => {
+const CreateAccount: React.FC = () => {
   return <View />;
-}
+};
 
 export default CreateAccount;
