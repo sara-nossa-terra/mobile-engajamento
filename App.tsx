@@ -1,12 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import Navigation from './src/routes/Navigation'
+import { StatusBar } from 'expo-status-bar';
+import { AuthProvider } from './src/hooks/Auth';
+import { NavigationContainer } from '@react-navigation/native';
+import Navigator from './src/routes/';
 
 export default function App() {
   return (
     <>
       <StatusBar style="auto" />
-      <Navigation />
+      <NavigationContainer>
+        <AuthProvider>
+          <Navigator />
+        </AuthProvider>
+      </NavigationContainer>
     </>
   );
 }
