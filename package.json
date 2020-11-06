@@ -20,6 +20,7 @@
     "eslint-plugin-react": "7.20.0",
     "expo": "^39.0.4",
     "expo-status-bar": "~1.0.2",
+    "formik": "^2.2.2",
     "native-base": "^2.13.14",
     "react": "16.13.1",
     "react-dom": "16.13.1",
@@ -30,7 +31,8 @@
     "react-native-safe-area-context": "3.1.4",
     "react-native-screens": "~2.10.1",
     "react-native-web": "~0.13.12",
-    "styled-components": "^5.2.0"
+    "styled-components": "^5.2.0",
+    "yup": "^0.29.3"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",
