@@ -1,14 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
-import { useAuth } from '@hooks/Auth';
+import { View, Text, StyleSheet } from 'react-native';
 
 const Dashboard: React.FC = () => {
-    const { logOut } = useAuth();
-
     return (
         <View style={styles.container}>
             <Text style={styles.text}>Dashboard</Text>
-            <Button title="Logout" onPress={logOut} />
         </View>
     );
 };
