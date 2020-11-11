@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Card, Text, Button, TextInput } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AppLoading from '@components/AppLoading';
 import { format } from 'date-fns';
@@ -20,34 +20,64 @@ import {
   StyleSheet,
 } from 'react-native';
 
+interface Activity {
+  id: number;
+  name: string;
+  day: Date;
+}
+
 interface SubmitFormData {
   name: string;
   day: Date;
 }
 
-const CreateActivityValidationSchema = Yup.object().shape({
+interface RouteParams {
+  activityId: number;
+}
+
+const EditActivityValidationSchema = Yup.object().shape({
   name: Yup.string().required(),
   date: Yup.date(),
 });
 
-const CreateActivity: React.FC = () => {
+const EditActivity: React.FC = () => {
+  const [activity, setActivity] = useState<Activity>({} as Activity);
   const [loading, setLoading] = useState<boolean>(true);
   const [showsDatePicker, setShowsDatePicker] = useState<boolean>(false); // picker de data
   const [showsTimePicker, setShowsTimePicker] = useState<boolean>(false); // picker de hora
 
   const navigation = useNavigation();
+  const { params } = useRoute();
+
+  const routeParams = params as RouteParams;
 
   useEffect(() => {
-    setLoading(false);
+    const { activityId } = routeParams;
+
+    if (!activityId) return navigation.goBack();
+
+    api
+      .get(`atividades/${activityId}`)
+      .then(response => {
+        setActivity(response.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        Alert.alert('Erro', 'Ocorreu um erro ao buscar a atividade', [
+          { text: 'OK', onPress: navigation.goBack, style: 'default' },
+        ]);
+      });
   }, []);
 
   // cadastrar atividade
   const onSubmit = async ({ name, day }: SubmitFormData) => {
+    const { activityId } = routeParams;
+
     api
-      .post('atividades', { name, day })
+      .put(`atividades/${activityId}`, { name, day })
       .then(() => navigation.navigate('ActivityStack'))
       .catch(err => {
-        Alert.alert('Erro', 'Ocorreu um erro ao cadastrar a atividade', [
+        Alert.alert('Erro', 'Ocorreu um erro ao editar a atividade', [
           { text: 'OK', style: 'default' },
         ]);
       });
@@ -62,14 +92,14 @@ const CreateActivity: React.FC = () => {
         enabled
       >
         <Card style={styles.card}>
-          <Card.Title title="Cadastrar Atividades" />
+          <Card.Title title="Editar Atividade" />
 
           <Formik
             onSubmit={onSubmit}
-            validationSchema={CreateActivityValidationSchema}
+            validationSchema={EditActivityValidationSchema}
             initialValues={{
-              name: '',
-              day: new Date(),
+              name: activity.name,
+              day: new Date(activity.day),
             }}
           >
             {({ values, errors, handleSubmit, setFieldValue, handleBlur }) => (
@@ -194,7 +224,7 @@ const CreateActivity: React.FC = () => {
   );
 };
 
-export default CreateActivity;
+export default EditActivity;
 
 const styles = StyleSheet.create({
   card: {

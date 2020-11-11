@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuth } from '@hooks/Auth';
+import AppLoading from '@components/AppLoading';
 /**
  *
  * App navigator -> rotas de quando o usuário está autenticado na aplicação
@@ -14,22 +14,9 @@ import AuthNavigator from '@routes/Auth.routes';
 const Navigation: React.FC = () => {
     const { loading, user } = useAuth();
 
-    if (loading)
-        return (
-            <View style={styles.loading}>
-                <ActivityIndicator size="large" color="#3B8EA5" />
-            </View>
-        );
+    if (loading) return <AppLoading />;
 
     return user ? <AppNavigator /> : <AuthNavigator />;
 };
 
 export default Navigation;
-
-const styles = StyleSheet.create({
-    loading: {
-        justifyContent: 'center',
-        flex: 1,
-        alignItems: 'center',
-    },
-});

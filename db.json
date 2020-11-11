@@ -1,0 +1,20 @@
+{
+  "users": {
+    "id": 1,
+    "name": "Admin",
+    "email": "admin@admin.com",
+    "birth": "0199-10-09T03:44:40.000Z"
+  },
+  "atividades": [
+    {
+      "name": "Culto",
+      "day": "2020-11-30T14:00:37.110Z",
+      "id": 4
+    },
+    {
+      "name": "Encontro",
+      "day": "2020-12-05T15:01:49.563Z",
+      "id": 5
+    }
+  ]
+}
