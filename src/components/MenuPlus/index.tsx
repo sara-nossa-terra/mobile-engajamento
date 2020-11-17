@@ -14,7 +14,6 @@ interface MenuPlusProps {
 const MenuPlus: React.FC<MenuPlusProps> = ({ route }) => {
   const navigation = useNavigation();
 
-  // @ts-ignore
   const onPress = () => navigation.navigate(route);
 
   return (

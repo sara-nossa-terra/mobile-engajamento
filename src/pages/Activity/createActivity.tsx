@@ -1,24 +1,16 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Card, Text, Button, TextInput } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
+import { Card, Text, TextInput, useTheme } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AppLoading from '@components/AppLoading';
+import Form from '@components/Form';
+import Button from '@components/Button';
+import Input from '@components/Input';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import api from '@services/Api';
-import {
-  heightPercentageToDP as hp,
-  widthPercentageToDP as wp,
-} from 'react-native-responsive-screen';
-import {
-  View,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-} from 'react-native';
+import { AppColors } from '../../types';
+import { View, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 
 interface SubmitFormData {
   name: string;
@@ -35,7 +27,7 @@ const CreateActivity: React.FC = () => {
   const [showsDatePicker, setShowsDatePicker] = useState<boolean>(false); // picker de data
   const [showsTimePicker, setShowsTimePicker] = useState<boolean>(false); // picker de hora
 
-  const navigation = useNavigation();
+  const theme = useTheme();
 
   useEffect(() => {
     setLoading(false);
@@ -43,152 +35,99 @@ const CreateActivity: React.FC = () => {
 
   // cadastrar atividade
   const onSubmit = async ({ name, day }: SubmitFormData) => {
-    api
-      .post('atividades', { name, day })
-      .then(() => navigation.navigate('ActivityStack'))
-      .catch(err => {
-        Alert.alert('Erro', 'Ocorreu um erro ao cadastrar a atividade', [
-          { text: 'OK', style: 'default' },
-        ]);
-      });
+    // @todo  integrar backend
   };
 
   if (loading) return <AppLoading />;
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center' }}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        enabled
-      >
-        <Card style={styles.card}>
-          <Card.Title title="Cadastrar Atividades" />
+    <View style={styles.container}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} enabled>
+        <Formik
+          onSubmit={onSubmit}
+          validationSchema={CreateActivityValidationSchema}
+          initialValues={{
+            name: '',
+            day: new Date(),
+          }}
+        >
+          {({ values, errors, handleSubmit, setFieldValue, handleBlur }) => (
+            <Form title="Atividade">
+              <Card.Content style={styles.cardContent}>
+                <Text style={styles.label}>Nome da atividade</Text>
 
-          <Formik
-            onSubmit={onSubmit}
-            validationSchema={CreateActivityValidationSchema}
-            initialValues={{
-              name: '',
-              day: new Date(),
-            }}
-          >
-            {({ values, errors, handleSubmit, setFieldValue, handleBlur }) => (
-              <>
-                <Card.Content style={styles.cardContent}>
-                  <Text>Nome</Text>
+                <Input
+                  value={values.name}
+                  placeholder="Nome da atividade"
+                  onChangeText={text => setFieldValue('name', text)}
+                  onBlur={handleBlur('name')}
+                  error={errors.name ? true : false}
+                  theme={theme}
+                />
+              </Card.Content>
 
-                  <TextInput
-                    value={values.name}
-                    onChangeText={text => setFieldValue('name', text)}
-                    onBlur={handleBlur('name')}
-                    style={styles.input}
-                    mode="outlined"
-                    error={errors.name ? true : false}
-                    theme={{
-                      colors: { primary: '#3b8ea5' },
+              <Card.Content style={styles.cardContent}>
+                <Text style={styles.label}>Dia da atividade</Text>
+
+                <Input
+                  disabled
+                  style={{ width: '45%' }}
+                  value={format(values.day, 'd - MMM - yyyy', {
+                    locale: ptBR,
+                  })}
+                  right={<TextInput.Icon name="calendar-month-outline" onPress={() => setShowsDatePicker(true)} />}
+                  theme={theme}
+                />
+
+                {showsDatePicker && (
+                  <DateTimePicker
+                    value={values.day}
+                    mode="date"
+                    is24Hour
+                    display="default"
+                    minimumDate={new Date()}
+                    onTouchCancel={() => setShowsDatePicker(false)}
+                    onChange={(e, selectedDate) => {
+                      setShowsDatePicker(false);
+                      if (selectedDate) setFieldValue('day', selectedDate);
                     }}
                   />
-                </Card.Content>
+                )}
+              </Card.Content>
 
-                <Card.Content style={styles.cardContent}>
-                  <Text>Dia</Text>
+              <Card.Content style={styles.cardContent}>
+                <Text style={styles.label}>Hora da atividade</Text>
 
-                  <TextInput
-                    disabled
-                    style={styles.input}
-                    mode="outlined"
-                    value={format(values.day, "d 'de' MMMM 'de' yyyy", {
-                      locale: ptBR,
-                    })}
-                    left={
-                      <TextInput.Icon
-                        name="calendar"
-                        onPress={() => setShowsDatePicker(true)}
-                      />
-                    }
-                    theme={{
-                      colors: { primary: '#3b8ea5' },
+                <Input
+                  value={format(values.day, 'HH:mm')}
+                  disabled
+                  style={{ width: '33%' }}
+                  right={<TextInput.Icon name="clock-outline" onPress={() => setShowsTimePicker(true)} />}
+                  theme={theme}
+                />
+
+                {showsTimePicker && (
+                  <DateTimePicker
+                    value={values.day}
+                    mode="time"
+                    is24Hour
+                    onTouchCancel={() => setShowsTimePicker(false)}
+                    onChange={(e, selectedDateTime) => {
+                      setShowsTimePicker(false);
+                      if (selectedDateTime) setFieldValue('day', selectedDateTime);
                     }}
                   />
+                )}
+              </Card.Content>
 
-                  {showsDatePicker && (
-                    <DateTimePicker
-                      value={values.day}
-                      mode="date"
-                      is24Hour
-                      display="default"
-                      minimumDate={new Date()}
-                      onTouchCancel={() => setShowsDatePicker(false)}
-                      onChange={(e, selectedDate) => {
-                        setShowsDatePicker(false);
-                        if (selectedDate) setFieldValue('day', selectedDate);
-                      }}
-                    />
-                  )}
-                </Card.Content>
-
-                <Card.Content style={styles.cardContent}>
-                  <Text>Hora</Text>
-
-                  <TextInput
-                    value={format(values.day, 'HH:mm')}
-                    disabled
-                    style={styles.input}
-                    mode="outlined"
-                    left={
-                      <TextInput.Icon
-                        name="clock"
-                        onPress={() => setShowsTimePicker(true)}
-                      />
-                    }
-                    theme={{
-                      colors: { primary: '#3b8ea5' },
-                    }}
-                  />
-
-                  {showsTimePicker && (
-                    <DateTimePicker
-                      value={values.day}
-                      mode="time"
-                      is24Hour
-                      onTouchCancel={() => setShowsTimePicker(false)}
-                      onChange={(e, selectedDateTime) => {
-                        setShowsTimePicker(false);
-                        if (selectedDateTime)
-                          setFieldValue('day', selectedDateTime);
-                      }}
-                    />
-                  )}
-                </Card.Content>
-
-                <Card.Content style={styles.cardContent}>
-                  <View style={styles.buttonContainer}>
-                    <Button
-                      style={styles.button}
-                      compact
-                      color="#00a3bb"
-                      mode="contained"
-                      icon="send"
-                      onPress={handleSubmit}
-                    >
-                      Salvar
-                    </Button>
-                    <Button
-                      style={styles.button}
-                      compact
-                      color="#ffcb00"
-                      mode="contained"
-                      icon="arrow-left"
-                      onPress={navigation.goBack}
-                    >
-                      Cancelar
-                    </Button>
-                  </View>
-                </Card.Content>
-              </>
-            )}
-          </Formik>
-        </Card>
+              <Card.Content style={styles.cardContent}>
+                <View style={styles.buttonContainer}>
+                  <Button onPress={() => handleSubmit()} title="ADICIONAR ATIVIDADE" />
+                </View>
+              </Card.Content>
+            </Form>
+          )}
+        </Formik>
       </KeyboardAvoidingView>
     </View>
   );
@@ -197,19 +136,18 @@ const CreateActivity: React.FC = () => {
 export default CreateActivity;
 
 const styles = StyleSheet.create({
-  card: {
-    paddingVertical: hp('2%'),
+  container: {
+    backgroundColor: AppColors.BLUE,
+    flex: 1,
   },
   cardContent: {
-    marginBottom: hp('1.5%'),
+    marginBottom: 10,
   },
-  input: {
-    backgroundColor: 'transparent',
+  label: {
+    fontFamily: 'Montserrat_medium',
+    fontSize: 12,
   },
   buttonContainer: {
-    flexDirection: 'row',
-  },
-  button: {
-    marginRight: wp('1.5%'),
+    marginVertical: 15,
   },
 });

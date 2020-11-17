@@ -10,6 +10,7 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
+      "@utils/*": ["./src/utils/*"],
       "@pages/*": ["./src/pages/*"],
       "@services/*": ["./src/services/*"],
       "@hooks/*": ["./src/hooks/*"],
