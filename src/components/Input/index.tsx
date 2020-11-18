@@ -12,7 +12,7 @@ const Input: React.FC<TextInputProps> = ({ error = false, right: RightComponet, 
       placeholderTextColor="rgb(217, 217, 217)"
       right={error ? <TextInput.Icon name="information" size={30} color={AppColors.RED} /> : RightComponet}
       error={error}
-      style={[style, styles.input]}
+      style={[styles.input, style]}
       {...rest}
     />
   );
