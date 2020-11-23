@@ -25,7 +25,6 @@ const CreateActivityValidationSchema = Yup.object().shape({
 const CreateActivity: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [showsDatePicker, setShowsDatePicker] = useState<boolean>(false); // picker de data
-  const [showsTimePicker, setShowsTimePicker] = useState<boolean>(false); // picker de hora
 
   const theme = useTheme();
 
@@ -90,31 +89,6 @@ const CreateActivity: React.FC = () => {
                     onChange={(e, selectedDate) => {
                       setShowsDatePicker(false);
                       if (selectedDate) setFieldValue('day', selectedDate);
-                    }}
-                  />
-                )}
-              </Card.Content>
-
-              <Card.Content style={styles.cardContent}>
-                <Text style={styles.label}>Hora da atividade</Text>
-
-                <Input
-                  value={format(values.day, 'HH:mm')}
-                  disabled
-                  style={{ width: '33%' }}
-                  right={<TextInput.Icon name="clock-outline" onPress={() => setShowsTimePicker(true)} />}
-                  theme={theme}
-                />
-
-                {showsTimePicker && (
-                  <DateTimePicker
-                    value={values.day}
-                    mode="time"
-                    is24Hour
-                    onTouchCancel={() => setShowsTimePicker(false)}
-                    onChange={(e, selectedDateTime) => {
-                      setShowsTimePicker(false);
-                      if (selectedDateTime) setFieldValue('day', selectedDateTime);
                     }}
                   />
                 )}
