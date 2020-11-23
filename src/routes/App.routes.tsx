@@ -78,7 +78,7 @@ const PeopleHelpedNavigator: React.FC = () => (
       name="CreatePeopleHelpedStack"
       component={CreatePeopleHelped}
       options={{
-        title: 'Cadastrar pessoa ajudada',
+        title: 'Cadastrar pessoas',
         headerLeft: () => <MenuHamburguer />,
         headerRight: () => <MenuLogout />,
       }}

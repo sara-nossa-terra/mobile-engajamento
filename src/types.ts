@@ -21,7 +21,10 @@ export interface Activity {
   day: Date;
 }
 
-export interface Leader {}
+export interface Leader {
+  id: number;
+  name: string;
+}
 
 export interface PersonHelped {}
 
