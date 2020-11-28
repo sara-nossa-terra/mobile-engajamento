@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, KeyboardAvoidingView, StyleSheet, Platform } from 'react-native';
-import { Card, Text, useTheme, TextInput, Menu, TouchableRipple } from 'react-native-paper';
+import { Card, Text, useTheme, TextInput, Menu } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Form from '@components/Form';
 import Input from '@components/Input';
 import Button from '@components/Button';
+import ptBR from 'date-fns/locale/pt-BR';
+import { format } from 'date-fns';
 import { AppColors, Leader } from '../../types';
 
 const leaders: Leader[] = [
@@ -39,7 +41,7 @@ const CreatePeopleHelped: React.FC = () => {
               placeholder={leaderSelected.name || 'Selecione um líder'}
               mode="outlined"
               theme={theme}
-              style={[styles.input, { marginBottom: 0 }]}
+              style={[styles.input, { marginBottom: 0, marginLeft: 6 }]}
               right={<TextInput.Icon name="menu-down" onPress={() => setShowsLeaderMenu(true)} />}
             />
             <Menu
@@ -70,6 +72,9 @@ const CreatePeopleHelped: React.FC = () => {
             <Input
               disabled
               placeholder="15 - 12 - 2000"
+              value={format(new Date(), 'd - MMM - yyyy', {
+                locale: ptBR,
+              })}
               style={[{ width: '45%' }, styles.input]}
               right={<TextInput.Icon name="calendar-month-outline" onPress={() => setShowsDatePicker(true)} />}
               theme={theme}
@@ -97,7 +102,13 @@ const CreatePeopleHelped: React.FC = () => {
           */}
           <Card.Content style={styles.cardContent}>
             <Text style={styles.label}>Telefone</Text>
-            <Input style={{ width: '65%' }} placeholder="(__) _____  -  ____" theme={theme} />
+            <Input
+              keyboardType="numeric"
+              textContentType="telephoneNumber"
+              style={{ width: '65%' }}
+              placeholder="(__) _____  -  ____"
+              theme={theme}
+            />
           </Card.Content>
 
           <Card.Content style={styles.cardContent}>
@@ -124,7 +135,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   input: {
-    borderColor: 'rgba(0, 0, 0, 0.25)',
     backgroundColor: '#ffff',
     fontSize: 12,
     fontFamily: 'Montserrat_medium',

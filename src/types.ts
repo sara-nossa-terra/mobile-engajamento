@@ -26,6 +26,11 @@ export interface Leader {
   name: string;
 }
 
-export interface PersonHelped {}
+export interface PersonHelped {
+  id: number;
+  name: string;
+  phone: string;
+  leader: string;
+}
 
 export interface LifeReview {}

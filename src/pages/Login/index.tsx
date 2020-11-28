@@ -106,7 +106,7 @@ const Login: React.FC = () => {
                 <Text style={styles.text}>Lembrar-me</Text>
               </View>
 
-              <Button large rounded onPress={handleSubmit} style={styles.button}>
+              <Button rounded onPress={handleSubmit} style={styles.button}>
                 <Text style={styles.buttonText}>ENTRAR</Text>
               </Button>
             </KeyboardAvoidingView>

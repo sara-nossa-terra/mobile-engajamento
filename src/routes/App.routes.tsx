@@ -2,10 +2,11 @@ import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import Dashboard from '@pages/Dashboard';
+import ActivityManage from '@pages/Activity';
+import PeopleHelpedManage from '@pages/PeopleHelped';
 import CreateLeader from '@pages/Leader/createLeader';
 import CreateActivity from '@pages/Activity/createActivity';
 import CreatePeopleHelped from '@pages/PeopleHelped/createPeopleHelped';
-import CreateLifeReview from '@pages/LifeReview/createLifeReview';
 import MenuHamburguer from '@components/MenuHamburguer';
 import MenuLogout from '@components/MenuLogOut';
 
@@ -61,13 +62,18 @@ const LeaderStackNavigator: React.FC = () => (
 const ActivityNavigator: React.FC = () => (
   <Stack.Navigator screenOptions={stackScreenOptions}>
     <Stack.Screen
-      name="CreateActivityStack"
-      component={CreateActivity}
+      name="ActivityManageStack"
+      component={ActivityManage}
       options={{
-        title: 'Cadastrar atividade',
+        title: 'Atividades',
         headerLeft: () => <MenuHamburguer />,
         headerRight: () => <MenuLogout />,
       }}
+    />
+    <Stack.Screen
+      name="CreateActivityStack"
+      component={CreateActivity}
+      options={{ title: 'Cadastrar atividade', headerRight: () => <MenuLogout /> }}
     />
   </Stack.Navigator>
 );
@@ -75,27 +81,19 @@ const ActivityNavigator: React.FC = () => (
 const PeopleHelpedNavigator: React.FC = () => (
   <Stack.Navigator screenOptions={stackScreenOptions}>
     <Stack.Screen
+      name="PeopleHelpedManageStack"
+      options={{
+        title: 'Pessoas ajudadas',
+        headerLeft: () => <MenuHamburguer />,
+        headerRight: () => <MenuLogout />,
+      }}
+      component={PeopleHelpedManage}
+    />
+
+    <Stack.Screen
       name="CreatePeopleHelpedStack"
       component={CreatePeopleHelped}
-      options={{
-        title: 'Cadastrar pessoas',
-        headerLeft: () => <MenuHamburguer />,
-        headerRight: () => <MenuLogout />,
-      }}
-    />
-  </Stack.Navigator>
-);
-
-const LifeReviewNavigator: React.FC = () => (
-  <Stack.Navigator screenOptions={stackScreenOptions}>
-    <Stack.Screen
-      name="CreateLifeReviewStack"
-      component={CreateLifeReview}
-      options={{
-        title: 'Cadastrar revisão de vidas',
-        headerLeft: () => <MenuHamburguer />,
-        headerRight: () => <MenuLogout />,
-      }}
+      options={{ title: 'Cadastrar pessoas', headerRight: () => <MenuLogout /> }}
     />
   </Stack.Navigator>
 );
@@ -111,14 +109,9 @@ const LifeReviewNavigator: React.FC = () => (
 const AppNavigator: React.FC = () => (
   <Drawer.Navigator>
     <Drawer.Screen name="Dashboard" component={DashboardStackNavigator} options={{ title: 'Dashboard' }} />
-
     <Drawer.Screen name="Leader" component={LeaderStackNavigator} options={{ title: 'Líderes' }} />
-
     <Drawer.Screen name="Activity" component={ActivityNavigator} options={{ title: 'Atividades' }} />
-
     <Drawer.Screen name="PeopleHelped" component={PeopleHelpedNavigator} options={{ title: 'Pessoas Ajudadas' }} />
-
-    <Drawer.Screen name="LifeReview" component={LifeReviewNavigator} options={{ title: 'Revisão de Vidas' }} />
   </Drawer.Navigator>
 );
 
