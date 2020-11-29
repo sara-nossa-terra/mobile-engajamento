@@ -2,7 +2,7 @@ export enum AppColors {
   RED = '#F2545B',
   GREEN = '#82B865',
   BLUE = '#3B8EA5',
-  YELLOW = 'FEAD34',
+  YELLOW = '#FEAD34',
   BLACK = '#27242E',
   OPTION_DISABLE = '#D9D9D9',
   INPUT_DISABLE = '#DFDFDF',
@@ -24,6 +24,7 @@ export interface Activity {
 export interface Leader {
   id: number;
   name: string;
+  phone: string;
 }
 
 export interface PersonHelped {

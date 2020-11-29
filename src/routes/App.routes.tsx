@@ -4,6 +4,7 @@ import { createStackNavigator, StackNavigationOptions } from '@react-navigation/
 import Dashboard from '@pages/Dashboard';
 import ActivityManage from '@pages/Activity';
 import PeopleHelpedManage from '@pages/PeopleHelped';
+import LeaderManage from '@pages/Leader';
 import CreateLeader from '@pages/Leader/createLeader';
 import CreateActivity from '@pages/Activity/createActivity';
 import CreatePeopleHelped from '@pages/PeopleHelped/createPeopleHelped';
@@ -48,11 +49,20 @@ const DashboardStackNavigator: React.FC = () => (
 const LeaderStackNavigator: React.FC = () => (
   <Stack.Navigator screenOptions={stackScreenOptions}>
     <Stack.Screen
+      name="LeaderManageStack"
+      component={LeaderManage}
+      options={{
+        title: 'Líderes',
+        headerLeft: () => <MenuHamburguer />,
+        headerRight: () => <MenuLogout />,
+      }}
+    />
+
+    <Stack.Screen
       name="CreateLeaderStack"
       component={CreateLeader}
       options={{
         title: 'Cadastrar atividade',
-        headerLeft: () => <MenuHamburguer />,
         headerRight: () => <MenuLogout />,
       }}
     />

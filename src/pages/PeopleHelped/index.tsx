@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Feather as Icon } from '@expo/vector-icons';
 import Button from '@components/Button';
 import AppLoading from '@components/AppLoading';
+import Toast from '@components/Toast';
 import faker from 'faker';
 import { AppColors, PersonHelped } from '../../types';
 
@@ -12,6 +13,7 @@ const PeopleHelped: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true); // carregando componente
   const [refreshing, setRefreshing] = useState<boolean>(false); // refresh na listagem de pessoas
   const [personHelpedList, setPersonHelpedList] = useState<PersonHelped[]>([]);
+  const [deletePersonHelpedToastVisible, setDeletePersonHelpedToastVisible] = useState<boolean>(false);
 
   const navigation = useNavigation();
 
@@ -20,6 +22,19 @@ const PeopleHelped: React.FC = () => {
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    if (deletePersonHelpedToastVisible) {
+      const timer = setTimeout(() => {
+        setDeletePersonHelpedToastVisible(false);
+      }, 5000);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [deletePersonHelpedToastVisible]);
+
+  // atualizar lista pessoas ajudadas
   const onRefresh = async () => {
     setRefreshing(true);
 
@@ -40,6 +55,9 @@ const PeopleHelped: React.FC = () => {
     const peopleHelpedList = personHelpedList.filter(person => person.id !== id);
 
     setPersonHelpedList(peopleHelpedList);
+
+    // mostra toast de exclusão por 5 segundos
+    setDeletePersonHelpedToastVisible(true);
   };
 
   if (loading) return <AppLoading />;
@@ -99,6 +117,15 @@ const PeopleHelped: React.FC = () => {
           )}
         />
       </View>
+
+      <Toast
+        title="PESSOA EXCLUÍDA"
+        onDismiss={() => setDeletePersonHelpedToastVisible(false)}
+        backgroundColor={AppColors.YELLOW}
+        iconColor={AppColors.YELLOW}
+        icon="trash-2"
+        visible={deletePersonHelpedToastVisible}
+      />
     </View>
   );
 };

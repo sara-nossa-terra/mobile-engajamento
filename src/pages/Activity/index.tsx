@@ -5,6 +5,7 @@ import { Divider } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import AppLoading from '@components/AppLoading';
 import Button from '@components/Button';
+import Toast from '@components/Toast';
 import { Feather as Icon } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import localePtBR from 'date-fns/locale/pt-BR';
@@ -15,6 +16,7 @@ const ActivityComponent: React.FC = () => {
   const [activityList, setActivityList] = useState<Activity[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // carregando este componente
   const [refreshing, setRefreshing] = useState<boolean>(false); // refresh na listagem de atividades
+  const [toastVisible, setToastVisible] = useState<boolean>(false);
 
   const navigation = useNavigation();
 
@@ -22,6 +24,16 @@ const ActivityComponent: React.FC = () => {
     setActivityList(fakeActivityList);
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (toastVisible) {
+      const timer = setTimeout(() => setToastVisible(false), 5000);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [toastVisible]);
 
   const onDeleteActivity = async (id: number) => {
     /**
@@ -34,6 +46,7 @@ const ActivityComponent: React.FC = () => {
     const newActivityList = activityList.filter(activity => activity.id !== id);
 
     setActivityList(newActivityList);
+    setToastVisible(true);
   };
 
   const onUpdateActivity = (id: number) => {
@@ -115,6 +128,16 @@ const ActivityComponent: React.FC = () => {
           )}
         />
       </View>
+
+      {/* Toast de exclusão de atividades */}
+      <Toast
+        onDismiss={() => setToastVisible(false)}
+        visible={toastVisible}
+        icon="trash-2"
+        title="Atividade excluída"
+        iconColor={AppColors.YELLOW}
+        backgroundColor={AppColors.YELLOW}
+      />
     </View>
   );
 };
