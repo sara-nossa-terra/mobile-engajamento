@@ -48,7 +48,7 @@ const LeaderStackNavigator: React.FC = () => (
       name="CreateLeaderStack"
       component={CreateLeader}
       options={{
-        title: 'Cadastrar atividade',
+        title: 'Cadastrar líderes',
         headerRight: () => <MenuLogout />,
       }}
     />
@@ -78,12 +78,12 @@ const PeopleHelpedNavigator: React.FC = () => (
   <Stack.Navigator screenOptions={stackScreenOptions}>
     <Stack.Screen
       name="PeopleHelpedManageStack"
+      component={PeopleHelpedManage}
       options={{
         title: 'Pessoas ajudadas',
         headerLeft: () => <MenuHamburguer />,
         headerRight: () => <MenuLogout />,
       }}
-      component={PeopleHelpedManage}
     />
 
     <Stack.Screen

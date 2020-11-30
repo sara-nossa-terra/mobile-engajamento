@@ -135,9 +135,6 @@ const CreatePeopleHelped: React.FC = () => {
                 )}
               </Card.Content>
 
-              {/* 
-                @TODO Input mask de telefone no campo abaixo de telefone
-              */}
               <Card.Content style={styles.cardContent}>
                 <Text style={styles.label}>Telefone</Text>
 
@@ -181,9 +178,9 @@ const CreatePeopleHelped: React.FC = () => {
 };
 
 const fakeLeaderList: Leader[] = [
-  { id: Math.round(Math.random() * 1000000), name: 'Valdemir' },
-  { id: Math.round(Math.random() * 1000000), name: 'Rafael' },
-  { id: Math.round(Math.random() * 1000000), name: 'Thiago' },
+  { id: Math.round(Math.random() * 1000000), name: 'Valdemir', phone: '(61) 99999-9999' },
+  { id: Math.round(Math.random() * 1000000), name: 'Rafael', phone: '(61) 99999-9999' },
+  { id: Math.round(Math.random() * 1000000), name: 'Thiago', phone: '(61) 99999-9999' },
 ];
 
 const styles = StyleSheet.create({

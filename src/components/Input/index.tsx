@@ -4,11 +4,8 @@ import { TextInputProps } from 'react-native-paper/src/components/TextInput/Text
 import { TextInput } from 'react-native-paper';
 import { AppColors } from '../../types';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
-import { useTheme } from 'react-native-paper/src/core/theming';
 
 const Input: React.FC<TextInputProps> = ({ error = false, right: RightComponet, style, ...rest }) => {
-  const theme = useTheme();
-
   return (
     <TextInput
       mode="outlined"
