@@ -13,9 +13,16 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { AppColors, Leader } from '../../types';
 
+interface SubmitFormData {
+  name: string;
+  birth: Date;
+  phone: string;
+}
+
 const formSchema = Yup.object().shape({
   name: Yup.string().required(),
-  phone: Yup.string().required(),
+  phone: Yup.string().min(15).required(),
+  birth: Yup.date().required(),
 });
 
 const CreatePeopleHelped: React.FC = () => {
@@ -39,7 +46,7 @@ const CreatePeopleHelped: React.FC = () => {
      */
   }, []);
 
-  const onSubmit = () => {
+  const onSubmit = (data: SubmitFormData) => {
     /**
      *
      * @todo
@@ -64,7 +71,7 @@ const CreatePeopleHelped: React.FC = () => {
           initialValues={{ name: '', phone: '', birth: new Date(2000, 0, 1) }}
           onSubmit={onSubmit}
         >
-          {({ values, handleSubmit, errors, setFieldValue, handleBlur }) => (
+          {({ values, handleSubmit, errors, handleChange, setFieldValue, handleBlur }) => (
             <Form title="Pessoa ajudada">
               <Card.Content style={[styles.cardContent, { marginBottom: 0 }]}>
                 <Text style={styles.label}>Líder</Text>
@@ -100,7 +107,7 @@ const CreatePeopleHelped: React.FC = () => {
                   placeholder="Nome completo"
                   value={values.name}
                   error={errors.name ? true : false}
-                  onChangeText={text => setFieldValue('name', text)}
+                  onChangeText={handleChange('name')}
                   onBlur={handleBlur('name')}
                   theme={theme}
                 />
@@ -125,7 +132,6 @@ const CreatePeopleHelped: React.FC = () => {
                     mode="date"
                     is24Hour
                     display="default"
-                    minimumDate={new Date(1900, 0, 1)}
                     onTouchCancel={() => setShowsDatePicker(false)}
                     onChange={(e, selectedDate) => {
                       setShowsDatePicker(false);
@@ -144,7 +150,7 @@ const CreatePeopleHelped: React.FC = () => {
                   placeholder="(__) _____  -  ____"
                   error={errors.phone ? true : false}
                   value={values.phone}
-                  onChangeText={text => setFieldValue('phone', text)}
+                  onChangeText={handleChange('phone')}
                   onBlur={handleBlur('phone')}
                   style={[styles.input, { width: '65%' }]}
                   mode="outlined"

@@ -33,7 +33,7 @@ const CreateActivity: React.FC = () => {
   }, []);
 
   // cadastrar atividade
-  const onSubmit = async ({ name, day }: SubmitFormData) => {
+  const onSubmit = async (data: SubmitFormData) => {
     // @todo  integrar backend
   };
 

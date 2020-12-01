@@ -9,7 +9,29 @@ import Input from '@components/Input';
 import AppLoading from '@components/AppLoading';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
 import { AppColors } from '../../types';
+
+interface SubmitFormData {
+  name: string;
+  birth: Date;
+  phone: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+const formSchema = Yup.object().shape({
+  name: Yup.string().required(),
+  birth: Yup.date().required(),
+  phone: Yup.string().min(15).required(),
+  email: Yup.string().email().required(),
+  password: Yup.string().min(5).required(),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('password')])
+    .required(),
+});
 
 const CreateLeader: React.FC = () => {
   const [showsDatePicker, setShowsDatePicker] = useState<boolean>(false);
@@ -21,107 +43,164 @@ const CreateLeader: React.FC = () => {
     setLoading(false);
   }, []);
 
+  const onSubmit = async (data: SubmitFormData) => {
+    /**
+     *
+     * @todo
+     *
+     * criar/editar líder
+     *
+     */
+  };
+
   if (loading) return <AppLoading />;
 
   return (
     <ScrollView style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} enabled>
-        <Form title="INFORMAÇÕES PESSOAIS">
-          <Card.Content style={styles.cardContent}>
-            <Text style={styles.label}>Nome</Text>
+        <Formik
+          onSubmit={onSubmit}
+          validationSchema={formSchema}
+          initialValues={{
+            name: '',
+            birth: new Date(2000, 10, 10),
+            phone: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+          }}
+        >
+          {({ values, handleSubmit, handleChange, setFieldValue, handleBlur, errors }) => (
+            <React.Fragment>
+              <Form title="INFORMAÇÕES PESSOAIS">
+                <Card.Content style={styles.cardContent}>
+                  <Text style={styles.label}>Nome</Text>
 
-            <Input placeholder="Nome completo" onChangeText={() => {}} theme={theme} />
-          </Card.Content>
+                  <Input
+                    value={values.name}
+                    placeholder="Nome completo"
+                    onChangeText={handleChange('name')}
+                    onBlur={handleBlur('name')}
+                    error={errors.name ? true : false}
+                    theme={theme}
+                  />
+                </Card.Content>
 
-          <Card.Content style={styles.cardContent}>
-            <Text style={styles.label}>Data de nascimento</Text>
+                <Card.Content style={styles.cardContent}>
+                  <Text style={styles.label}>Data de nascimento</Text>
 
-            <Input
-              disabled
-              style={{ width: '45%' }}
-              value={format(new Date(2000, 9, 10), 'd - M - yyyy', {
-                locale: ptBR,
-              })}
-              right={<TextInput.Icon name="calendar-month-outline" onPress={() => setShowsDatePicker(true)} />}
-              theme={theme}
-            />
+                  <Input
+                    disabled
+                    value={format(new Date(values.birth), 'd - M - yyyy', {
+                      locale: ptBR,
+                    })}
+                    error={errors.birth ? true : false}
+                    style={{ width: '45%' }}
+                    right={<TextInput.Icon name="calendar-month-outline" onPress={() => setShowsDatePicker(true)} />}
+                    theme={theme}
+                  />
 
-            {showsDatePicker && (
-              <DateTimePicker
-                value={new Date()}
-                mode="date"
-                is24Hour
-                display="default"
-                onTouchCancel={() => setShowsDatePicker(false)}
-                onChange={(e, selectedDate) => {
-                  setShowsDatePicker(false);
-                  //   if (selectedDate) setFieldValue('day', selectedDate);
-                }}
-              />
-            )}
-          </Card.Content>
+                  {showsDatePicker && (
+                    <DateTimePicker
+                      value={new Date()}
+                      mode="date"
+                      is24Hour
+                      display="default"
+                      onTouchCancel={() => setShowsDatePicker(false)}
+                      onChange={(e, selectedDate) => {
+                        setShowsDatePicker(false);
+                        if (selectedDate) setFieldValue('birth', selectedDate);
+                      }}
+                    />
+                  )}
+                </Card.Content>
 
-          <Card.Content>
-            <Text style={styles.label}>Telefone</Text>
+                <Card.Content>
+                  <Text style={styles.label}>Telefone</Text>
 
-            <TextInput
-              keyboardType="numeric"
-              textContentType="telephoneNumber"
-              placeholder="(__) _____  -  ____"
-              //   error={errors.phone ? true : false}
-              value={''}
-              onChangeText={text => {}}
-              //   onBlur={handleBlur('phone')}
-              style={[styles.input, { width: '65%' }]}
-              mode="outlined"
-              theme={theme}
-              render={props => (
-                // @ts-ignore
-                <TextInputMask
-                  type={'cel-phone'}
-                  options={{
-                    maskType: 'BRL',
-                    withDDD: true,
-                    dddMask: '(99) ',
-                  }}
-                  {...props}
-                />
-              )}
-            />
-          </Card.Content>
-        </Form>
+                  <TextInput
+                    keyboardType="numeric"
+                    textContentType="telephoneNumber"
+                    placeholder="(__) _____  -  ____"
+                    error={errors.phone ? true : false}
+                    value={values.phone}
+                    onChangeText={handleChange('phone')}
+                    onBlur={handleBlur('phone')}
+                    style={[styles.input, { width: '65%' }]}
+                    mode="outlined"
+                    theme={theme}
+                    render={props => (
+                      // @ts-ignore
+                      <TextInputMask
+                        type={'cel-phone'}
+                        options={{
+                          maskType: 'BRL',
+                          withDDD: true,
+                          dddMask: '(99) ',
+                        }}
+                        {...props}
+                      />
+                    )}
+                  />
+                </Card.Content>
+              </Form>
 
-        <Form title="CRIAR CONTA">
-          <Card.Content style={styles.cardContent}>
-            <Text style={styles.label}>E-mail</Text>
+              <Form title="CRIAR CONTA">
+                <Card.Content style={styles.cardContent}>
+                  <Text style={styles.label}>E-mail</Text>
 
-            <Input
-              textContentType="emailAddress"
-              keyboardType="email-address"
-              placeholder="email@email.com"
-              onChangeText={() => {}}
-              theme={theme}
-            />
-          </Card.Content>
+                  <Input
+                    textContentType="emailAddress"
+                    keyboardType="email-address"
+                    placeholder="email@email.com"
+                    value={values.email}
+                    onChangeText={handleChange('email')}
+                    onBlur={handleBlur('email')}
+                    error={errors.email ? true : false}
+                    theme={theme}
+                  />
+                </Card.Content>
 
-          <Card.Content style={styles.cardContent}>
-            <Text style={styles.label}>Senha</Text>
+                <Card.Content style={styles.cardContent}>
+                  <Text style={styles.label}>Senha</Text>
+                  <Text style={[styles.label, { color: 'rgb(168, 168, 168)', fontStyle: 'italic' }]}>
+                    5 ou mais caracteres
+                  </Text>
 
-            <Input secureTextEntry={true} placeholder="*********" onChangeText={() => {}} theme={theme} />
-          </Card.Content>
+                  <Input
+                    value={values.password}
+                    onBlur={handleBlur('password')}
+                    onChangeText={handleChange('password')}
+                    secureTextEntry={true}
+                    placeholder="*********"
+                    error={errors.password ? true : false}
+                    theme={theme}
+                  />
+                </Card.Content>
 
-          <Card.Content style={styles.cardContent}>
-            <Text style={styles.label}>Confirmação de senha</Text>
+                <Card.Content style={styles.cardContent}>
+                  <Text style={styles.label}>Confirmação de senha</Text>
 
-            <Input secureTextEntry={true} placeholder="*********" onChangeText={() => {}} theme={theme} />
-          </Card.Content>
+                  <Input
+                    value={values.confirmPassword}
+                    onChangeText={handleChange('confirmPassword')}
+                    onBlur={handleBlur('confirmPassword')}
+                    secureTextEntry={true}
+                    placeholder="*********"
+                    error={errors.confirmPassword ? true : false}
+                    theme={theme}
+                  />
+                </Card.Content>
 
-          <Card.Content style={styles.cardContent}>
-            <View style={styles.buttonContainer}>
-              <Button onPress={() => {}} title="ADICIONAR LÍDER" />
-            </View>
-          </Card.Content>
-        </Form>
+                <Card.Content style={styles.cardContent}>
+                  <View style={styles.buttonContainer}>
+                    <Button onPress={() => handleSubmit()} title="ADICIONAR LÍDER" />
+                  </View>
+                </Card.Content>
+              </Form>
+            </React.Fragment>
+          )}
+        </Formik>
       </KeyboardAvoidingView>
     </ScrollView>
   );
