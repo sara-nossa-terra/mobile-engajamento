@@ -53,11 +53,15 @@ const PeopleHelped: React.FC = () => {
      */
 
     const peopleHelpedList = personHelpedList.filter(person => person.id !== id);
-
     setPersonHelpedList(peopleHelpedList);
 
     // mostra toast de exclusão por 5 segundos
     setDeletePersonHelpedToastVisible(true);
+  };
+
+  const onUpdatePersonHelped = (personId: number) => {
+    if (!personId) return;
+    navigation.navigate('EditPersonHelpedStack', { personId });
   };
 
   if (loading) return <AppLoading />;
@@ -86,7 +90,10 @@ const PeopleHelped: React.FC = () => {
                 <Text style={styles.personLeader} children={`Líder: ${item.leader}`} />
               </View>
               <View style={styles.personActions}>
-                <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center' }} onPress={() => {}}>
+                <TouchableOpacity
+                  style={{ justifyContent: 'center', alignItems: 'center' }}
+                  onPress={() => onUpdatePersonHelped(item.id)}
+                >
                   <Icon
                     style={[styles.personIcon, { backgroundColor: AppColors.GREEN }]}
                     name="edit"
@@ -112,7 +119,7 @@ const PeopleHelped: React.FC = () => {
           ItemSeparatorComponent={() => <Divider />} // renderizado entre cada componente (cada pessoa ajudada)
           ListFooterComponent={() => (
             <View style={styles.buttonContainer}>
-              <Button onPress={() => navigation.navigate('CreatePeopleHelpedStack')} title="ADICIONAR PESSOA" />
+              <Button onPress={() => navigation.navigate('CreatePersonHelpedStack')} title="ADICIONAR PESSOA" />
             </View>
           )}
         />

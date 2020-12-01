@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, KeyboardAvoidingView, StyleSheet, Platform } from 'react-native';
 import { Card, Text, useTheme, TextInput, Menu } from 'react-native-paper';
 import AppLoading from '@components/AppLoading';
+import DropDownPicker from 'react-native-dropdown-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Form from '@components/Form';
 import Input from '@components/Input';
@@ -17,6 +18,7 @@ interface SubmitFormData {
   name: string;
   birth: Date;
   phone: string;
+  leader: { label: string; value: number }; // value é o ID do líder
 }
 
 const formSchema = Yup.object().shape({
@@ -30,12 +32,11 @@ const CreatePeopleHelped: React.FC = () => {
   const [showsDatePicker, setShowsDatePicker] = useState<boolean>(false);
   const [showsLeaderMenu, setShowsLeaderMenu] = useState<boolean>(false);
   const [leaderSelected, setLeaderSelected] = useState<Leader>({} as Leader);
+  const [leaderList, setLeaderList] = useState<Leader[]>([]);
 
   const theme = useTheme();
 
   useEffect(() => {
-    setLoading(false);
-
     /**
      *
      * @todo
@@ -44,6 +45,9 @@ const CreatePeopleHelped: React.FC = () => {
      * listar líderes no input de líderes
      *
      */
+
+    setLeaderList(fakeLeaderList);
+    setLoading(false);
   }, []);
 
   const onSubmit = (data: SubmitFormData) => {
@@ -68,7 +72,7 @@ const CreatePeopleHelped: React.FC = () => {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} enabled>
         <Formik
           validationSchema={formSchema}
-          initialValues={{ name: '', phone: '', birth: new Date(2000, 0, 1) }}
+          initialValues={{ name: '', phone: '', birth: new Date(2000, 0, 1), leader: { label: '', value: 0 } }}
           onSubmit={onSubmit}
         >
           {({ values, handleSubmit, errors, handleChange, setFieldValue, handleBlur }) => (
@@ -84,21 +88,25 @@ const CreatePeopleHelped: React.FC = () => {
                   style={[styles.input, { marginBottom: 0, marginLeft: 6 }]}
                   right={<TextInput.Icon name="menu-down" onPress={() => setShowsLeaderMenu(true)} />}
                 />
-                <Menu
-                  visible={showsLeaderMenu}
-                  onDismiss={() => setShowsLeaderMenu(false)}
-                  anchor={<Text onPress={() => setShowsLeaderMenu(true)} children="" style={{ fontSize: 6 }} />}
-                  style={{ width: '85%' }}
-                >
-                  {fakeLeaderList.map(leader => (
-                    <Menu.Item
-                      titleStyle={{ fontFamily: 'Montserrat_medium', fontSize: 12 }}
-                      onPress={() => onSelectLeader(leader)}
-                      title={leader.name}
-                      key={leader.id}
-                    />
-                  ))}
-                </Menu>
+
+                <DropDownPicker
+                  items={leaderList.map(leader => ({ label: leader.name, value: leader.id }))}
+                  onChangeItem={item => setFieldValue('leader', item || {})}
+                  defaultValue={values.leader.value || 0}
+                  style={{
+                    borderTopLeftRadius: theme.roundness,
+                    borderTopRightRadius: theme.roundness,
+                    borderBottomLeftRadius: theme.roundness,
+                    borderBottomRightRadius: theme.roundness,
+                    borderColor: errors.leader ? theme.colors.error : theme.colors.disabled,
+                    borderWidth: errors.leader ? 2 : 1,
+                  }}
+                  multiple={false}
+                  containerStyle={{ height: 55, marginLeft: 5 }}
+                  itemStyle={{ justifyContent: 'flex-start' }}
+                  labelStyle={{ fontFamily: 'Montserrat_medium', fontSize: 12 }}
+                  placeholderStyle={{ color: AppColors.INPUT_DISABLE, fontFamily: 'Montserrat_medium', fontSize: 12 }}
+                />
               </Card.Content>
 
               <Card.Content style={styles.cardContent}>
@@ -184,9 +192,28 @@ const CreatePeopleHelped: React.FC = () => {
 };
 
 const fakeLeaderList: Leader[] = [
-  { id: Math.round(Math.random() * 1000000), name: 'Valdemir', phone: '(61) 99999-9999' },
-  { id: Math.round(Math.random() * 1000000), name: 'Rafael', phone: '(61) 99999-9999' },
-  { id: Math.round(Math.random() * 1000000), name: 'Thiago', phone: '(61) 99999-9999' },
+  { id: 0, name: 'Selecíone um líder', phone: '(61) 99999-9999', email: 'email@email.com', birth: new Date() },
+  {
+    id: Math.round(Math.random() * 1000000),
+    name: 'Valdemir',
+    phone: '(61) 99999-9999',
+    birth: new Date(),
+    email: 'email@email.com',
+  },
+  {
+    id: Math.round(Math.random() * 1000000),
+    name: 'Rafael',
+    phone: '(61) 99999-9999',
+    birth: new Date(),
+    email: 'email@email.com',
+  },
+  {
+    id: Math.round(Math.random() * 1000000),
+    name: 'Thiago',
+    phone: '(61) 99999-9999',
+    birth: new Date(),
+    email: 'email@email.com',
+  },
 ];
 
 const styles = StyleSheet.create({

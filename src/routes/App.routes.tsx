@@ -4,17 +4,22 @@ import { Text, Divider } from 'react-native-paper';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import { Feather as Icon } from '@expo/vector-icons';
+import MenuHamburguer from '@components/MenuHamburguer';
+import MenuLogout from '@components/MenuLogOut';
+import { useAuth } from '@hooks/Auth';
+import { AppColors } from '../types';
+
+// pages
 import Dashboard from '@pages/Dashboard';
 import ActivityManage from '@pages/Activity';
 import PeopleHelpedManage from '@pages/PeopleHelped';
 import LeaderManage from '@pages/Leader';
 import CreateLeader from '@pages/Leader/createLeader';
 import CreateActivity from '@pages/Activity/createActivity';
-import CreatePeopleHelped from '@pages/PeopleHelped/createPeopleHelped';
-import MenuHamburguer from '@components/MenuHamburguer';
-import MenuLogout from '@components/MenuLogOut';
-import { useAuth } from '@hooks/Auth';
-import { AppColors } from '../types';
+import CreatePersonHelped from '@pages/PeopleHelped/createPersonHelped';
+import EditActivity from '@pages/Activity/editActivity';
+import EditPersonHelped from '@pages/PeopleHelped/editPersonHelped';
+import EditLeader from '@pages/Leader/editLeader';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -53,6 +58,15 @@ const LeaderStackNavigator: React.FC = () => (
         headerRight: () => <MenuLogout />,
       }}
     />
+
+    <Stack.Screen
+      name="EditLeaderStack"
+      component={EditLeader}
+      options={{
+        title: 'Editar líder',
+        headerRight: () => <MenuLogout />,
+      }}
+    />
   </Stack.Navigator>
 );
 
@@ -72,6 +86,12 @@ const ActivityNavigator: React.FC = () => (
       component={CreateActivity}
       options={{ title: 'Cadastrar atividade', headerRight: () => <MenuLogout /> }}
     />
+
+    <Stack.Screen
+      name="EditActivityStack"
+      component={EditActivity}
+      options={{ title: 'Editar atividade', headerRight: () => <MenuLogout /> }}
+    />
   </Stack.Navigator>
 );
 
@@ -88,9 +108,15 @@ const PeopleHelpedNavigator: React.FC = () => (
     />
 
     <Stack.Screen
-      name="CreatePeopleHelpedStack"
-      component={CreatePeopleHelped}
+      name="CreatePersonHelpedStack"
+      component={CreatePersonHelped}
       options={{ title: 'Cadastrar pessoas', headerRight: () => <MenuLogout /> }}
+    />
+
+    <Stack.Screen
+      name="EditPersonHelpedStack"
+      component={EditPersonHelped}
+      options={{ title: 'Editar pessoa', headerRight: () => <MenuLogout /> }}
     />
   </Stack.Navigator>
 );
@@ -162,6 +188,31 @@ const AppNavigator: React.FC = () => {
     </Drawer.Navigator>
   );
 };
+
+/**
+ *
+ * Drawer Label
+ *
+ * Label estilado do menu drawer (cada item do menu e tal do drawer)
+ *
+ * title => nome do menu
+ * icon => icone do menu
+ *
+ */
+
+const DrawerLabel: React.FC<{ color: string; focused?: boolean; title: string; icon: string }> = ({
+  color = AppColors.BLUE,
+  title,
+  icon,
+}) => (
+  <View style={styles.drawerItem}>
+    <Icon name={icon} size={20} color={color} />
+    <Text style={[styles.drawerItemText, { color }]}>{title}</Text>
+    <Icon name="chevron-right" size={20} color={color} />
+  </View>
+);
+
+// estilização header do stack navigator
 const stackScreenOptions: StackNavigationOptions = {
   headerTitleAlign: 'center',
   headerTintColor: '#fff',
@@ -216,28 +267,5 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 });
-
-/**
- *
- * Drawer Label
- *
- * Label estilado do menu drawer (cada item do menu e tal do drawer)
- *
- * title => nome do menu
- * icon => icone do menu
- *
- */
-
-const DrawerLabel: React.FC<{ color: string; focused?: boolean; title: string; icon: string }> = ({
-  color = AppColors.BLUE,
-  title,
-  icon,
-}) => (
-  <View style={styles.drawerItem}>
-    <Icon name={icon} size={20} color={color} />
-    <Text style={[styles.drawerItemText, { color }]}>{title}</Text>
-    <Icon name="chevron-right" size={20} color={color} />
-  </View>
-);
 
 export default AppNavigator;

@@ -65,6 +65,11 @@ const LeaderComponent: React.FC = () => {
     }, 2000);
   };
 
+  const onUpdateLeader = (leaderId: number) => {
+    if (!leaderId) return;
+    navigation.navigate('EditLeaderStack', { leaderId });
+  };
+
   if (loading) return <AppLoading />;
 
   return (
@@ -90,7 +95,10 @@ const LeaderComponent: React.FC = () => {
                 <Text style={styles.leaderPhone} children={item.phone} />
               </View>
               <View style={styles.iconContainer}>
-                <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center' }} onPress={() => {}}>
+                <TouchableOpacity
+                  style={{ justifyContent: 'center', alignItems: 'center' }}
+                  onPress={() => onUpdateLeader(item.id)}
+                >
                   <Icon
                     style={[styles.icon, { backgroundColor: AppColors.GREEN }]}
                     name="edit"

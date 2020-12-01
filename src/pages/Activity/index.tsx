@@ -49,14 +49,9 @@ const ActivityComponent: React.FC = () => {
     setToastVisible(true);
   };
 
-  const onUpdateActivity = (id: number) => {
-    // ao atualizar uma atividade
-    /**
-     *
-     * @todo
-     * redirecionar para a página de edição de atividade
-     *
-     */
+  const onUpdateActivity = (activityId: number) => {
+    if (!activityId) return;
+    navigation.navigate('EditActivityStack', { activityId });
   };
 
   const onRefresh = () => {
@@ -97,7 +92,10 @@ const ActivityComponent: React.FC = () => {
                 />
               </View>
               <View style={styles.activityActionsContainer}>
-                <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center' }} onPress={() => {}}>
+                <TouchableOpacity
+                  style={{ justifyContent: 'center', alignItems: 'center' }}
+                  onPress={() => onUpdateActivity(item.id)}
+                >
                   <Icon
                     style={[styles.activityIcon, { backgroundColor: AppColors.GREEN }]}
                     name="edit"

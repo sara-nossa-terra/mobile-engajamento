@@ -25,13 +25,16 @@ export interface Leader {
   id: number;
   name: string;
   phone: string;
+  email: string;
+  birth: Date;
 }
 
 export interface PersonHelped {
   id: number;
   name: string;
   phone: string;
-  leader: string;
+  birth: Date;
+  leaderId: number;
 }
 
 export interface LifeReview {}

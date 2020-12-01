@@ -28,6 +28,7 @@
     "react-dom": "16.13.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-39.0.4.tar.gz",
     "react-native-bootstrap-styles": "^0.4.5-0-l",
+    "react-native-dropdown-picker": "^3.7.1",
     "react-native-gesture-handler": "~1.7.0",
     "react-native-masked-text": "^1.13.0",
     "react-native-paper": "^4.3.0",
