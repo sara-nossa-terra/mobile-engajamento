@@ -11,6 +11,7 @@ import { AppColors, Leader } from '../../types';
 
 const LeaderComponent: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [leaderList, setLeaderList] = useState<Leader[]>([]);
   const [deleteLeaderToastVisible, setDeleteLeaderToastVisible] = useState<boolean>(false);
 
@@ -47,6 +48,23 @@ const LeaderComponent: React.FC = () => {
     setDeleteLeaderToastVisible(true);
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    /**
+     *
+     * @todo
+     *
+     * requisistar lista de líderes novamente
+     *
+     */
+
+    setTimeout(() => {
+      setLeaderList(fakeLeaderList);
+      setRefreshing(false);
+    }, 2000);
+  };
+
   if (loading) return <AppLoading />;
 
   return (
@@ -55,6 +73,8 @@ const LeaderComponent: React.FC = () => {
         <FlatList
           data={leaderList}
           keyExtractor={(item, index) => `${item.id}-${index}`}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
           ListHeaderComponent={() => (
             <React.Fragment>
               <View style={styles.cardTitleContainer}>
