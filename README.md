@@ -38,24 +38,6 @@ Após alguns instantes a aplicação estará disponível em:
 
 Caso esteja usando um smartphone, é necessário possui o aplicativo do EXPO instalado nele e escanear o QRCode que aparecer na página aberta em `localhost:19002`.
 
-### consumir a Api fake do projeto
-
-Para consumir a api Fake do projeto em seu dispositivo, é necessário configurar o redirecionamento da porta na sua máquina para o app do seu smartphone digitando o comando abaixo:
-
-```bash
-    $ adb -s <device name> reverse tcp:3000 tcp:3000
-```
-
-OBS: o nome do dispositivo pode ser pego utilizando o comando `adb devices` (necessário ter o [adb instalando na sua máquina](https://developer.android.com/studio/command-line/adb?hl=pt-br))
-
-Feito isso, execute o comando abaixo em outra aba no terminal e reinicie sua aplicação:
-
-```bash
-    $ yarn server
-```
-
-Para consumir a API via wifi, basta mudar o caminho do servidor da api em `src/services/Api.ts`, colocando o IP e a porta que se encontra o servidor fake.
-
 ## :rocket: Tecnologias
 
 O aplicativo mobile do sistema Engajamento foi construida com React Native. Abaixo estão listadas as tecnologias utilizadas no aplicativo.
