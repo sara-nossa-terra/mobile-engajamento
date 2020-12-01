@@ -152,7 +152,7 @@ const CreatePeopleHelped: React.FC = () => {
                   value={values.phone}
                   onChangeText={handleChange('phone')}
                   onBlur={handleBlur('phone')}
-                  style={[styles.input, { width: '65%' }]}
+                  style={[styles.input, { width: '65%', paddingLeft: 5 }]}
                   mode="outlined"
                   theme={theme}
                   render={props => (

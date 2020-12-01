@@ -13,6 +13,7 @@ import CreateActivity from '@pages/Activity/createActivity';
 import CreatePeopleHelped from '@pages/PeopleHelped/createPeopleHelped';
 import MenuHamburguer from '@components/MenuHamburguer';
 import MenuLogout from '@components/MenuLogOut';
+import { useAuth } from '@hooks/Auth';
 import { AppColors } from '../types';
 
 const Drawer = createDrawerNavigator();
@@ -102,62 +103,65 @@ const PeopleHelpedNavigator: React.FC = () => (
  * lógica acima para cada tela ter um "header menu"
  *
  */
-const AppNavigator: React.FC = () => (
-  <Drawer.Navigator
-    keyboardDismissMode="on-drag"
-    // estilização do header, footer e content do menu drawer
-    drawerContent={props => (
-      <DrawerContentScrollView {...props} contentContainerStyle={styles.drawerContainer}>
-        <View>
-          <View style={styles.drawerHeader}>
-            <Text style={styles.drawerHeaderText}>Menu</Text>
+const AppNavigator: React.FC = () => {
+  const { logOut } = useAuth();
+
+  return (
+    <Drawer.Navigator
+      keyboardDismissMode="on-drag"
+      // estilização do header, footer e content do menu drawer
+      drawerContent={props => (
+        <DrawerContentScrollView {...props} contentContainerStyle={styles.drawerContainer}>
+          <View>
+            <View style={styles.drawerHeader}>
+              <Text style={styles.drawerHeaderText}>Menu</Text>
+            </View>
+            <Divider style={{ marginBottom: 16 }} />
+            <DrawerItemList {...props} />
           </View>
-          <Divider style={{ marginBottom: 16 }} />
-          <DrawerItemList {...props} />
-        </View>
 
-        <View>
-          <TouchableOpacity onPress={() => {}} activeOpacity={0.1}>
-            <Text style={styles.drawerLogout}>SAIR</Text>
-          </TouchableOpacity>
-        </View>
-      </DrawerContentScrollView>
-    )}
-  >
-    <Drawer.Screen
-      name="Dashboard"
-      component={DashboardStackNavigator}
-      options={{
-        drawerIcon: () => <DrawerLabel title="INICIAL" icon="home" color={AppColors.BLUE} />,
-      }}
-    />
+          <View>
+            <TouchableOpacity onPress={logOut} activeOpacity={0.1}>
+              <Text style={styles.drawerLogout}>SAIR</Text>
+            </TouchableOpacity>
+          </View>
+        </DrawerContentScrollView>
+      )}
+    >
+      <Drawer.Screen
+        name="Dashboard"
+        component={DashboardStackNavigator}
+        options={{
+          drawerIcon: () => <DrawerLabel title="INICIAL" icon="home" color={AppColors.BLUE} />,
+        }}
+      />
 
-    <Drawer.Screen
-      name="Leader"
-      component={LeaderStackNavigator}
-      options={{
-        drawerIcon: () => <DrawerLabel title="LÍDERES" icon="user" color={AppColors.BLUE} />,
-      }}
-    />
+      <Drawer.Screen
+        name="Leader"
+        component={LeaderStackNavigator}
+        options={{
+          drawerIcon: () => <DrawerLabel title="LÍDERES" icon="user" color={AppColors.BLUE} />,
+        }}
+      />
 
-    <Drawer.Screen
-      name="PeopleHelped"
-      component={PeopleHelpedNavigator}
-      options={{
-        drawerIcon: () => <DrawerLabel title="PESSOAS AJUDADAS" icon="users" color={AppColors.BLUE} />,
-      }}
-    />
+      <Drawer.Screen
+        name="PeopleHelped"
+        component={PeopleHelpedNavigator}
+        options={{
+          drawerIcon: () => <DrawerLabel title="PESSOAS AJUDADAS" icon="users" color={AppColors.BLUE} />,
+        }}
+      />
 
-    <Drawer.Screen
-      name="Activity"
-      component={ActivityNavigator}
-      options={{
-        drawerIcon: () => <DrawerLabel title="ATIVIDADES" icon="plus-square" color={AppColors.BLUE} />,
-      }}
-    />
-  </Drawer.Navigator>
-);
-
+      <Drawer.Screen
+        name="Activity"
+        component={ActivityNavigator}
+        options={{
+          drawerIcon: () => <DrawerLabel title="ATIVIDADES" icon="plus-square" color={AppColors.BLUE} />,
+        }}
+      />
+    </Drawer.Navigator>
+  );
+};
 const stackScreenOptions: StackNavigationOptions = {
   headerTitleAlign: 'center',
   headerTintColor: '#fff',
