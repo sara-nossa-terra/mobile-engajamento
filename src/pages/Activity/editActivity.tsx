@@ -11,6 +11,7 @@ import { Formik } from 'formik';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { Activity, AppColors } from '../../types';
+import * as Yup from 'yup';
 import faker from 'faker';
 
 interface RouteParams {
@@ -22,6 +23,11 @@ interface SubmitFormData {
   name: string;
   day: Date;
 }
+
+const formSchema = Yup.object().shape({
+  name: Yup.string().required(),
+  date: Yup.date(),
+});
 
 const EditActivity: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -74,8 +80,9 @@ const EditActivity: React.FC = () => {
             id: activity.id,
           }}
           onSubmit={onSubmit}
+          validationSchema={formSchema}
         >
-          {({ values, handleSubmit, handleBlur, setFieldValue, errors }) => (
+          {({ values, errors, handleSubmit, handleBlur, setFieldValue }) => (
             <Form title="ATIVIDADE">
               <Card.Content style={styles.cardContent}>
                 <Text style={styles.label}>Nome da atividade</Text>

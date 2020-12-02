@@ -17,7 +17,7 @@ interface SubmitFormData {
   day: Date;
 }
 
-const CreateActivityValidationSchema = Yup.object().shape({
+const formSchema = Yup.object().shape({
   name: Yup.string().required(),
   date: Yup.date(),
 });
@@ -44,7 +44,7 @@ const CreateActivity: React.FC = () => {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} enabled>
         <Formik
           onSubmit={onSubmit}
-          validationSchema={CreateActivityValidationSchema}
+          validationSchema={formSchema}
           initialValues={{
             name: '',
             day: new Date(),

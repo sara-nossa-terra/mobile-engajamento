@@ -96,7 +96,7 @@ const EditPersonHelped: React.FC = () => {
           onSubmit={onSubmit}
           validationSchema={formSchema}
         >
-          {({ values, errors, handleSubmit, handleChange, handleBlur, setFieldValue }) => (
+          {({ values, errors, touched, handleSubmit, handleChange, setFieldTouched, setFieldValue }) => (
             <Form title="GERENCIAR PESSOA AJUDADA">
               <Card.Content style={styles.cardContent}>
                 <Text style={[styles.label, { marginBottom: 5 }]}>Líder</Text>
@@ -126,9 +126,9 @@ const EditPersonHelped: React.FC = () => {
                 <Input
                   placeholder="Nome completo"
                   value={values.name}
-                  error={errors.name ? true : false}
+                  error={errors.name && touched.name ? true : false}
                   onChangeText={handleChange('name')}
-                  onBlur={handleBlur('name')}
+                  onBlur={() => setFieldTouched('name', true)}
                   theme={theme}
                 />
               </Card.Content>
@@ -168,10 +168,10 @@ const EditPersonHelped: React.FC = () => {
                   keyboardType="numeric"
                   textContentType="telephoneNumber"
                   placeholder="(__) _____  -  ____"
-                  error={errors.phone ? true : false}
+                  error={errors.phone && touched.phone ? true : false}
                   value={values.phone}
                   onChangeText={handleChange('phone')}
-                  onBlur={handleBlur('phone')}
+                  onBlur={() => setFieldTouched('phone', true)}
                   style={[styles.input, { width: '65%', paddingLeft: 5 }]}
                   mode="outlined"
                   theme={theme}

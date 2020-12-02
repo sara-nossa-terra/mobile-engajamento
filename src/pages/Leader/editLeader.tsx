@@ -94,7 +94,7 @@ const EditLeader: React.FC = () => {
             confirmPassword: '',
           }}
         >
-          {({ values, handleSubmit, handleChange, setFieldValue, handleBlur, errors }) => (
+          {({ values, errors, touched, setFieldTouched, handleSubmit, handleChange, setFieldValue, handleBlur }) => (
             <React.Fragment>
               <Form title="INFORMAÇÕES PESSOAIS">
                 <Card.Content style={styles.cardContent}>
@@ -104,8 +104,8 @@ const EditLeader: React.FC = () => {
                     value={values.name}
                     placeholder="Nome completo"
                     onChangeText={handleChange('name')}
-                    onBlur={handleBlur('name')}
-                    error={errors.name ? true : false}
+                    onBlur={() => setFieldTouched('name', true)}
+                    error={errors.name && touched.name ? true : false}
                     theme={theme}
                   />
                 </Card.Content>
@@ -146,10 +146,10 @@ const EditLeader: React.FC = () => {
                     keyboardType="numeric"
                     textContentType="telephoneNumber"
                     placeholder="(__) _____  -  ____"
-                    error={errors.phone ? true : false}
+                    error={errors.phone && touched.phone ? true : false}
                     value={values.phone}
                     onChangeText={handleChange('phone')}
-                    onBlur={handleBlur('phone')}
+                    onBlur={() => setFieldTouched('phone', true)}
                     style={[styles.input, { width: '65%', paddingLeft: 5 }]}
                     mode="outlined"
                     theme={theme}
@@ -179,8 +179,8 @@ const EditLeader: React.FC = () => {
                     placeholder="email@email.com"
                     value={values.email}
                     onChangeText={handleChange('email')}
-                    onBlur={handleBlur('email')}
-                    error={errors.email ? true : false}
+                    onBlur={() => setFieldTouched('email', true)}
+                    error={errors.email && touched.email ? true : false}
                     theme={theme}
                   />
                 </Card.Content>
@@ -193,11 +193,11 @@ const EditLeader: React.FC = () => {
 
                   <Input
                     value={values.password}
-                    onBlur={handleBlur('password')}
+                    onBlur={() => setFieldTouched('password', true)}
                     onChangeText={handleChange('password')}
                     secureTextEntry={true}
                     placeholder="*********"
-                    error={errors.password ? true : false}
+                    error={errors.password && touched.password ? true : false}
                     theme={theme}
                   />
                 </Card.Content>
@@ -208,10 +208,10 @@ const EditLeader: React.FC = () => {
                   <Input
                     value={values.confirmPassword}
                     onChangeText={handleChange('confirmPassword')}
-                    onBlur={handleBlur('confirmPassword')}
+                    onBlur={() => setFieldTouched('confirmPassword', true)}
                     secureTextEntry={true}
                     placeholder="*********"
-                    error={errors.confirmPassword ? true : false}
+                    error={errors.confirmPassword && touched.confirmPassword ? true : false}
                     theme={theme}
                   />
                 </Card.Content>

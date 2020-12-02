@@ -75,24 +75,20 @@ const CreatePeopleHelped: React.FC = () => {
           initialValues={{ name: '', phone: '', birth: new Date(2000, 0, 1), leader: { label: '', value: 0 } }}
           onSubmit={onSubmit}
         >
-          {({ values, handleSubmit, errors, handleChange, setFieldValue, handleBlur }) => (
+          {({ values, handleSubmit, errors, handleChange, setFieldValue, touched, setFieldTouched }) => (
             <Form title="Pessoa ajudada">
-              <Card.Content style={[styles.cardContent, { marginBottom: 0 }]}>
-                <Text style={styles.label}>Líder</Text>
-
-                <TextInput
-                  disabled
-                  placeholder={leaderSelected.name || 'Selecione um líder'}
-                  mode="outlined"
-                  theme={theme}
-                  style={[styles.input, { marginBottom: 0, marginLeft: 6 }]}
-                  right={<TextInput.Icon name="menu-down" onPress={() => setShowsLeaderMenu(true)} />}
-                />
+              <Card.Content style={[styles.cardContent, { marginBottom: 5 }]}>
+                <Text style={[styles.label, { marginBottom: 5 }]}>Líder</Text>
 
                 <DropDownPicker
                   items={leaderList.map(leader => ({ label: leader.name, value: leader.id }))}
                   onChangeItem={item => setFieldValue('leader', item || {})}
                   defaultValue={values.leader.value || 0}
+                  multiple={false}
+                  containerStyle={{ height: 55, marginLeft: 5 }}
+                  itemStyle={{ justifyContent: 'flex-start' }}
+                  labelStyle={{ fontFamily: 'Montserrat_medium', fontSize: 12 }}
+                  placeholderStyle={{ color: AppColors.INPUT_DISABLE, fontFamily: 'Montserrat_medium', fontSize: 12 }}
                   style={{
                     borderTopLeftRadius: theme.roundness,
                     borderTopRightRadius: theme.roundness,
@@ -101,11 +97,6 @@ const CreatePeopleHelped: React.FC = () => {
                     borderColor: errors.leader ? theme.colors.error : theme.colors.disabled,
                     borderWidth: errors.leader ? 2 : 1,
                   }}
-                  multiple={false}
-                  containerStyle={{ height: 55, marginLeft: 5 }}
-                  itemStyle={{ justifyContent: 'flex-start' }}
-                  labelStyle={{ fontFamily: 'Montserrat_medium', fontSize: 12 }}
-                  placeholderStyle={{ color: AppColors.INPUT_DISABLE, fontFamily: 'Montserrat_medium', fontSize: 12 }}
                 />
               </Card.Content>
 
@@ -114,9 +105,9 @@ const CreatePeopleHelped: React.FC = () => {
                 <Input
                   placeholder="Nome completo"
                   value={values.name}
-                  error={errors.name ? true : false}
+                  error={errors.name && touched.name ? true : false}
                   onChangeText={handleChange('name')}
-                  onBlur={handleBlur('name')}
+                  onBlur={() => setFieldTouched('name', true)}
                   theme={theme}
                 />
               </Card.Content>
@@ -156,10 +147,10 @@ const CreatePeopleHelped: React.FC = () => {
                   keyboardType="numeric"
                   textContentType="telephoneNumber"
                   placeholder="(__) _____  -  ____"
-                  error={errors.phone ? true : false}
+                  error={errors.phone && touched.phone ? true : false}
                   value={values.phone}
                   onChangeText={handleChange('phone')}
-                  onBlur={handleBlur('phone')}
+                  onBlur={() => setFieldTouched('phone', true)}
                   style={[styles.input, { width: '65%', paddingLeft: 5 }]}
                   mode="outlined"
                   theme={theme}

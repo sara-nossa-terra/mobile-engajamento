@@ -48,9 +48,9 @@ const Login: React.FC = () => {
           password: '',
         }}
       >
-        {({ values, errors, handleBlur, handleSubmit, handleChange }) => (
+        {({ values, errors, touched, setFieldTouched, handleBlur, handleSubmit, handleChange }) => (
           <React.Fragment>
-            {false && (
+            {error && (
               <View style={styles.errorContainer}>
                 <View style={styles.error} />
                 <View style={styles.errorTextContainer}>
@@ -73,10 +73,10 @@ const Login: React.FC = () => {
                 <Text style={styles.subtitle}>Inicie uma sessão</Text>
               </View>
               <Input
-                error={!!errors.email}
+                error={errors.email && touched.email ? true : false}
                 value={values.email}
                 onChangeText={handleChange('email')}
-                onBlur={handleBlur('email')}
+                onBlur={() => setFieldTouched('email', true)}
                 autoCompleteType="email"
                 keyboardType="email-address"
                 placeholder="E-mail"
@@ -85,10 +85,10 @@ const Login: React.FC = () => {
                 theme={theme}
               />
               <Input
-                error={!!errors.password}
+                error={errors.password && touched.password ? true : false}
                 value={values.password}
                 onChangeText={handleChange('password')}
-                onBlur={handleBlur('password')}
+                onBlur={() => setFieldTouched('password', true)}
                 secureTextEntry={true}
                 placeholder="Senha"
                 placeholderTextColor="rgb(39, 36, 46)"
