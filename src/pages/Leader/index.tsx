@@ -8,15 +8,29 @@ import Toast from '@components/Toast';
 import AppLoading from '@components/AppLoading';
 import faker from 'faker';
 import { AppColors, Leader } from '../../types';
+import api from '@services/Api';
 
 const LeaderComponent: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [leaderList, setLeaderList] = useState<Leader[]>([]);
   const [deleteLeaderToastVisible, setDeleteLeaderToastVisible] = useState<boolean>(false);
+  const [errorToastVisible, setErrorToastVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    setLeaderList(fakeLeaderList);
+    api
+      .get('/v1/leaderss')
+      .then(response => {
+        const data = response.data.data as Leader[];
+        setLeaderList(data);
+      })
+      .catch(err => {
+        setLeaderList([]);
+        setErrorToastVisible(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
     setLoading(false);
   }, []);
 
@@ -51,16 +65,21 @@ const LeaderComponent: React.FC = () => {
   const onRefresh = async () => {
     setRefreshing(true);
 
-    /**
-     *
-     * @todo
-     *
-     * requisistar lista de líderes novamente
-     *
-     */
-
     setTimeout(() => {
-      setLeaderList(fakeLeaderList);
+      api
+        .get('/v1/leaderss')
+        .then(response => {
+          const data = response.data.data as Leader[];
+          setLeaderList(data);
+        })
+        .catch(err => {
+          setLeaderList([]);
+          setErrorToastVisible(true);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+      setLoading(false);
       setRefreshing(false);
     }, 2000);
   };
@@ -91,8 +110,8 @@ const LeaderComponent: React.FC = () => {
           renderItem={({ item }) => (
             <View key={item.id} style={styles.leader}>
               <View style={styles.leaderInfo}>
-                <Text style={styles.leaderName} children={item.name} />
-                <Text style={styles.leaderPhone} children={item.phone} />
+                <Text style={styles.leaderName} children={item.tx_nome} />
+                <Text style={styles.leaderPhone} children={item.nu_telefone} />
               </View>
               <View style={styles.iconContainer}>
                 <TouchableOpacity
@@ -139,11 +158,21 @@ const LeaderComponent: React.FC = () => {
         onDismiss={() => setDeleteLeaderToastVisible(false)}
         visible={deleteLeaderToastVisible}
       />
+
+      {/* Toast de erro ao mostrar atividades */}
+      <Toast
+        onDismiss={() => setErrorToastVisible(false)}
+        visible={errorToastVisible}
+        icon="x"
+        title="Não foi possível mostrar os Líderes"
+        iconColor={AppColors.RED}
+        backgroundColor={AppColors.RED}
+      />
     </View>
   );
 };
 
-const fakeLeaderList: Leader[] = [
+/* const fakeLeaderList: Leader[] = [
   { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
   { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
   { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
@@ -156,7 +185,7 @@ const fakeLeaderList: Leader[] = [
   { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
   { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
   { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
-];
+]; */
 
 const styles = StyleSheet.create({
   container: {
