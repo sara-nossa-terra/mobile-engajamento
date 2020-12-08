@@ -19,9 +19,9 @@ const EditPersonHelped: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [person, setPerson] = useState<PersonHelped>({} as PersonHelped);
 
-  // toasts
-  const [errorToastVisible, setErrorToastVisible] = useState<boolean>(false);
+  const [errorUpdatePersonToastVisible, setErrorUpdatePersonToastVisible] = useState<boolean>(false);
   const [successToastVisible, setSuccessToastVisible] = useState<boolean>(false);
+  const [errorShowPersonToastVisible, setErrorShowPersonToastVisible] = useState<boolean>(false);
 
   const navigation = useNavigation();
   const route = useRoute();
@@ -32,10 +32,11 @@ const EditPersonHelped: React.FC = () => {
     api
       .get(`/v1/helpedPersons/${personId}`)
       .then(response => {
-        setPerson(response.data.data);
+        const data = response.data.data as PersonHelped;
+        setPerson(data);
       })
       .catch(() => {
-        setErrorToastVisible(true);
+        setErrorShowPersonToastVisible(true);
       })
       .finally(() => {
         setLoading(false);
@@ -56,18 +57,31 @@ const EditPersonHelped: React.FC = () => {
     }
   }, [successToastVisible]);
 
+  // mostra toast de erro ao requisistar pessoa por id por 5 segs
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (errorShowPersonToastVisible) {
+        setErrorShowPersonToastVisible(false);
+      }
+    }, 5000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [errorShowPersonToastVisible]);
+
   // mostra toast de erro por 5 segs
   useEffect(() => {
-    if (errorToastVisible) {
-      const timer = setTimeout(() => {
-        setErrorToastVisible(false);
-      }, 5000);
+    const timer = setTimeout(() => {
+      if (errorUpdatePersonToastVisible) {
+        setErrorUpdatePersonToastVisible(false);
+      }
+    }, 5000);
 
-      return () => {
-        clearTimeout(timer);
-      };
-    }
-  }, [errorToastVisible]);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [errorUpdatePersonToastVisible]);
 
   // edita pessoa ajudada
   const onSubmit = ({ nu_telefone, tx_nome, leader, dt_nascimento }: SubmitFormData) => {
@@ -88,8 +102,7 @@ const EditPersonHelped: React.FC = () => {
         setSuccessToastVisible(true);
       })
       .catch(err => {
-        console.log(err.response);
-        setErrorToastVisible(true);
+        setErrorUpdatePersonToastVisible(true);
       });
   };
 
@@ -102,12 +115,21 @@ const EditPersonHelped: React.FC = () => {
       </KeyboardAvoidingView>
 
       <Toast
-        title="Ocorreu um erro"
-        onDismiss={() => setErrorToastVisible(false)}
+        title="Erro ao atualizar pessoa"
+        onDismiss={() => setErrorUpdatePersonToastVisible(false)}
         icon="x"
         iconColor={AppColors.RED}
         backgroundColor={AppColors.RED}
-        visible={errorToastVisible}
+        visible={errorUpdatePersonToastVisible}
+      />
+
+      <Toast
+        title="Erro ao mostrar pessoa"
+        onDismiss={() => setErrorShowPersonToastVisible(false)}
+        icon="x"
+        iconColor={AppColors.RED}
+        backgroundColor={AppColors.RED}
+        visible={errorShowPersonToastVisible}
       />
 
       <Toast

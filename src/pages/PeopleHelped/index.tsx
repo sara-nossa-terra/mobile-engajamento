@@ -13,8 +13,9 @@ const PeopleHelped: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true); // carregando componente
   const [refreshing, setRefreshing] = useState<boolean>(false); // refresh na listagem de pessoas
   const [personHelpedList, setPersonHelpedList] = useState<PersonHelped[]>([]);
+
   const [deletePersonHelpedToastVisible, setDeletePersonHelpedToastVisible] = useState<boolean>(false);
-  const [errorToastVisible, setErrorToastVisible] = useState<boolean>(false);
+  const [errorShowPeopleHelpedToastVisible, setErrorShowPeopleHelpedToastVisible] = useState<boolean>(false);
 
   const navigation = useNavigation();
 
@@ -22,10 +23,12 @@ const PeopleHelped: React.FC = () => {
     api
       .get('/v1/helpedPersons')
       .then(response => {
-        setPersonHelpedList(response.data.data);
+        const data = response.data.data as PersonHelped[];
+        setPersonHelpedList(data);
       })
       .catch(() => {
-        setErrorToastVisible(true);
+        setPersonHelpedList([]);
+        setErrorShowPeopleHelpedToastVisible(true);
       })
       .finally(() => {
         setLoading(false);
@@ -34,29 +37,29 @@ const PeopleHelped: React.FC = () => {
 
   // mostra toast de exclusão de pessoas ajudadas  por 5 segs
   useEffect(() => {
-    if (deletePersonHelpedToastVisible) {
-      const timer = setTimeout(() => {
+    const timer = setTimeout(() => {
+      if (deletePersonHelpedToastVisible) {
         setDeletePersonHelpedToastVisible(false);
-      }, 5000);
+      }
+    }, 5000);
 
-      return () => {
-        clearTimeout(timer);
-      };
-    }
+    return () => {
+      clearTimeout(timer);
+    };
   }, [deletePersonHelpedToastVisible]);
 
-  // mostra toast de erro ao mostrar atividades por 5 segs
+  // mostra toast de erro ao mostrar pessoas por 5 segs
   useEffect(() => {
-    if (errorToastVisible) {
-      const timer = setTimeout(() => {
-        setErrorToastVisible(false);
-      }, 5000);
+    const timer = setTimeout(() => {
+      if (errorShowPeopleHelpedToastVisible) {
+        setErrorShowPeopleHelpedToastVisible(false);
+      }
+    }, 5000);
 
-      return () => {
-        clearTimeout(timer);
-      };
-    }
-  }, [errorToastVisible]);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [errorShowPeopleHelpedToastVisible]);
 
   // atualizar lista pessoas ajudadas
   const onRefresh = async () => {
@@ -65,11 +68,12 @@ const PeopleHelped: React.FC = () => {
     api
       .get('/v1/helpedPersons')
       .then(response => {
-        setPersonHelpedList(response.data.data);
+        const data = response.data.data as PersonHelped[];
+        setPersonHelpedList(data);
       })
       .catch(() => {
         setPersonHelpedList([]);
-        setErrorToastVisible(true);
+        setErrorShowPeopleHelpedToastVisible(true);
       })
       .finally(() => {
         setRefreshing(false);
@@ -120,7 +124,8 @@ const PeopleHelped: React.FC = () => {
               <View style={styles.personInfo}>
                 <Text style={styles.personName} children={item.tx_nome} />
                 <Text style={styles.personPhone} children={`(${item.nu_ddd}) ${item.nu_telefone}`} />
-                {/* <Text style={styles.personLeader} children={`Líder: ${item.leader}`} /> */}
+
+                {item.lider_id && <Text style={styles.personLeader} children={`Líder: ${item.lider_id.tx_nome}`} />}
               </View>
               <View style={styles.personActions}>
                 <TouchableOpacity
@@ -169,11 +174,11 @@ const PeopleHelped: React.FC = () => {
 
       <Toast
         title="ERRO AO MOSTRAR PESSOAS AJUDADAS"
-        onDismiss={() => {}}
+        onDismiss={() => setErrorShowPeopleHelpedToastVisible(false)}
         backgroundColor={AppColors.RED}
         iconColor={AppColors.RED}
         icon="x"
-        visible={errorToastVisible}
+        visible={errorShowPeopleHelpedToastVisible}
       />
     </View>
   );

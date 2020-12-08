@@ -17,6 +17,7 @@ interface SubmitFormData {
 
 const CreatePeopleHelped: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
+
   const [errorToastVisible, setErrorToastVisible] = useState<boolean>(false);
   const [successToastVisible, setSuccessToastVisible] = useState<boolean>(false);
 
@@ -28,29 +29,29 @@ const CreatePeopleHelped: React.FC = () => {
 
   // mostra toast de sucesso por 5 segs e redireciona o usuário pra listagem
   useEffect(() => {
-    if (successToastVisible) {
-      const timer = setTimeout(() => {
+    const timer = setTimeout(() => {
+      if (successToastVisible) {
         setSuccessToastVisible(false);
         navigation.goBack();
-      }, 5000);
+      }
+    }, 5000);
 
-      return () => {
-        clearTimeout(timer);
-      };
-    }
+    return () => {
+      clearTimeout(timer);
+    };
   }, [successToastVisible]);
 
   // mostra toast de erro por 5 segs
   useEffect(() => {
-    if (errorToastVisible) {
-      const timer = setTimeout(() => {
+    const timer = setTimeout(() => {
+      if (errorToastVisible) {
         setErrorToastVisible(false);
-      }, 5000);
+      }
+    }, 5000);
 
-      return () => {
-        clearTimeout(timer);
-      };
-    }
+    return () => {
+      clearTimeout(timer);
+    };
   }, [errorToastVisible]);
 
   // cadastra pessoa ajudada
@@ -71,7 +72,7 @@ const CreatePeopleHelped: React.FC = () => {
       .then(() => {
         setSuccessToastVisible(true);
       })
-      .catch(err => {
+      .catch(() => {
         setErrorToastVisible(true);
       });
   };
@@ -85,7 +86,7 @@ const CreatePeopleHelped: React.FC = () => {
       </KeyboardAvoidingView>
 
       <Toast
-        title="Ocorreu um erro"
+        title="Erro ao cadastrar pessoa"
         onDismiss={() => setErrorToastVisible(false)}
         icon="x"
         iconColor={AppColors.RED}
