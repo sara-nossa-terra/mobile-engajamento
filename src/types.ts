@@ -28,7 +28,7 @@ export interface Leader {
   dt_nascimento: Date;
   nu_ddd: number;
   nu_telefone: number;
-  lider_id: Leader | null;
+  lider_id: Leader;
 }
 
 export interface PersonHelped {

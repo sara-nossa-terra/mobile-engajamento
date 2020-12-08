@@ -6,7 +6,6 @@ import { Feather as Icon } from '@expo/vector-icons';
 import Button from '@components/Button';
 import Toast from '@components/Toast';
 import AppLoading from '@components/AppLoading';
-import faker from 'faker';
 import { AppColors, Leader } from '../../types';
 import api from '@services/Api';
 
@@ -15,73 +14,72 @@ const LeaderComponent: React.FC = () => {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [leaderList, setLeaderList] = useState<Leader[]>([]);
   const [deleteLeaderToastVisible, setDeleteLeaderToastVisible] = useState<boolean>(false);
-  const [errorToastVisible, setErrorToastVisible] = useState<boolean>(false);
+  const [errorShowLeaderVisible, seterrorShowLeaderVisible] = useState<boolean>(false);
+  const [errorDeleteLeaderVisible, setErrorDeleteLeaderVisible] = useState<boolean>(false);
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     api
-      .get('/v1/leaderss')
+      .get('/v1/leaders')
       .then(response => {
         const data = response.data.data as Leader[];
         setLeaderList(data);
       })
       .catch(err => {
         setLeaderList([]);
-        setErrorToastVisible(true);
+        seterrorShowLeaderVisible(true);
       })
       .finally(() => {
         setLoading(false);
       });
-    setLoading(false);
   }, []);
 
+  // mostra toast de erro por 5 segs
   useEffect(() => {
-    if (deleteLeaderToastVisible) {
-      const timer = setTimeout(() => setDeleteLeaderToastVisible(false), 5000);
-      return () => {
-        clearTimeout(timer);
-      };
-    }
+    const timer = setTimeout(() => {
+      if (deleteLeaderToastVisible) {
+        setDeleteLeaderToastVisible(false);
+      }
+    }, 5000);
+
+    return () => {
+      clearTimeout(timer);
+    };
   }, [deleteLeaderToastVisible]);
 
-  const navigation = useNavigation();
+  const onDeleteLeader = async (leaderId: number) => {
+    api
+      .delete(`/v1/leaders/${leaderId}`)
+      .then(() => {
+        const newLeaderList = leaderList.filter(leader => leader.id !== leaderId);
+        setLeaderList(newLeaderList);
 
-  const onDeleteLeader = async (id: number) => {
-    /**
-     *
-     * @todo
-     *
-     * requisitar exclusão no back
-     *
-     */
-
-    const newLeaderList = leaderList.filter(leader => leader.id !== id);
-
-    setLeaderList(newLeaderList);
-
-    // mostra o toast de sucesso de exclusão por 5 segundos
-    setDeleteLeaderToastVisible(true);
+        // mostra o toast de sucesso de exclusão por 5 segundos
+        setDeleteLeaderToastVisible(true);
+      })
+      .catch(err => {
+        setErrorDeleteLeaderVisible(true);
+      });
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
 
-    setTimeout(() => {
-      api
-        .get('/v1/leaderss')
-        .then(response => {
-          const data = response.data.data as Leader[];
-          setLeaderList(data);
-        })
-        .catch(err => {
-          setLeaderList([]);
-          setErrorToastVisible(true);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-      setLoading(false);
-      setRefreshing(false);
-    }, 2000);
+    api
+      .get('/v1/leaders')
+      .then(response => {
+        const data = response.data.data as Leader[];
+        setLeaderList(data);
+      })
+      .catch(err => {
+        setLeaderList([]);
+        seterrorShowLeaderVisible(true);
+      })
+      .finally(() => {
+        setLoading(false);
+        setRefreshing(false);
+      });
   };
 
   const onUpdateLeader = (leaderId: number) => {
@@ -111,7 +109,7 @@ const LeaderComponent: React.FC = () => {
             <View key={item.id} style={styles.leader}>
               <View style={styles.leaderInfo}>
                 <Text style={styles.leaderName} children={item.tx_nome} />
-                <Text style={styles.leaderPhone} children={item.nu_telefone} />
+                <Text style={styles.leaderPhone} children={`(${item.nu_ddd}) ${item.nu_telefone}`} />
               </View>
               <View style={styles.iconContainer}>
                 <TouchableOpacity
@@ -159,33 +157,26 @@ const LeaderComponent: React.FC = () => {
         visible={deleteLeaderToastVisible}
       />
 
-      {/* Toast de erro ao mostrar atividades */}
       <Toast
-        onDismiss={() => setErrorToastVisible(false)}
-        visible={errorToastVisible}
+        onDismiss={() => seterrorShowLeaderVisible(false)}
+        visible={errorShowLeaderVisible}
         icon="x"
         title="Não foi possível mostrar os Líderes"
+        iconColor={AppColors.RED}
+        backgroundColor={AppColors.RED}
+      />
+
+      <Toast
+        onDismiss={() => setErrorDeleteLeaderVisible(false)}
+        visible={errorDeleteLeaderVisible}
+        icon="x"
+        title="Erro ao excluir líder"
         iconColor={AppColors.RED}
         backgroundColor={AppColors.RED}
       />
     </View>
   );
 };
-
-/* const fakeLeaderList: Leader[] = [
-  { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
-  { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
-  { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
-  { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
-  { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
-  { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
-  { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
-  { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
-  { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
-  { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
-  { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
-  { id: faker.random.number(), name: faker.name.findName(), phone: faker.phone.phoneNumberFormat(1) },
-]; */
 
 const styles = StyleSheet.create({
   container: {
@@ -215,7 +206,6 @@ const styles = StyleSheet.create({
   },
 
   // leader Style
-
   leader: {
     flexDirection: 'row',
     paddingVertical: 10,
