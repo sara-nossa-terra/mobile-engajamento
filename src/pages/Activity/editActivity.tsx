@@ -4,7 +4,6 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import FormActivity from '@components/Form/Activity';
 import AppLoading from '@components/AppLoading';
 import Toast from '@components/Toast';
-import * as Yup from 'yup';
 import api from '@services/Api';
 import { formatAmericanDatetimeToDate, formatDateToAmericanDatetime } from '@utils/formatAmericanDatetimeToDate';
 import { Activity, AppColors } from '../../types';
@@ -18,16 +17,13 @@ interface SubmitFormData {
   dt_dia: Date;
 }
 
-const formSchema = Yup.object().shape({
-  tx_nome: Yup.string().required(),
-  dt_dia: Yup.date(),
-});
-
 const EditActivity: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [activity, setActivity] = useState<Activity>({} as Activity);
+
   const [errorToastVisible, setErrorToastVisible] = useState<boolean>(false);
   const [successToastVisible, setSuccessToastVisible] = useState<boolean>(false);
+  const [errorShowActivityToastVisible, setErrorShowActivityToastVisible] = useState<boolean>(false);
 
   const route = useRoute();
   const navigation = useNavigation();
@@ -39,9 +35,13 @@ const EditActivity: React.FC = () => {
       .get(`/v1/activities/${activityId}`)
       .then(response => {
         setActivity({ ...response.data.data, dt_dia: formatAmericanDatetimeToDate(response.data.data.dt_dia) });
-        setLoading(false);
       })
-      .catch(navigation.goBack);
+      .catch(() => {
+        setErrorShowActivityToastVisible(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   // mostra o toast de erro por 5 segs
@@ -71,6 +71,19 @@ const EditActivity: React.FC = () => {
       clearTimeout(timer);
     };
   }, [successToastVisible]);
+
+  // mostra o toast de erro ao requisitar atividade ao back por 5 segs
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (errorShowActivityToastVisible) {
+        setErrorShowActivityToastVisible(false);
+      }
+    }, 5000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [errorShowActivityToastVisible]);
 
   const onDismissSuccessToast = async () => {
     setSuccessToastVisible(false);
@@ -102,7 +115,6 @@ const EditActivity: React.FC = () => {
         <FormActivity activity={activity} onSubmit={onSubmit} />
       </KeyboardAvoidingView>
 
-      {/* Toast de erro ao mostrar atividade */}
       <Toast
         onDismiss={onDismissErrorToast}
         visible={errorToastVisible}
@@ -112,7 +124,6 @@ const EditActivity: React.FC = () => {
         backgroundColor={AppColors.RED}
       />
 
-      {/* Toast de erro ao mostrar atividade */}
       <Toast
         onDismiss={onDismissSuccessToast}
         visible={successToastVisible}
@@ -120,6 +131,15 @@ const EditActivity: React.FC = () => {
         title="Atividade editada com sucesso"
         iconColor={AppColors.GREEN}
         backgroundColor={AppColors.BLUE}
+      />
+
+      <Toast
+        onDismiss={() => setErrorShowActivityToastVisible(false)}
+        visible={errorShowActivityToastVisible}
+        icon="x"
+        title="Erro ao mostrar atividade"
+        iconColor={AppColors.RED}
+        backgroundColor={AppColors.RED}
       />
     </View>
   );

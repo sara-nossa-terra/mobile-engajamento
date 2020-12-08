@@ -17,8 +17,10 @@ const ActivityComponent: React.FC = () => {
   const [activityList, setActivityList] = useState<Activity[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // carregando este componente
   const [refreshing, setRefreshing] = useState<boolean>(false); // refresh na listagem de atividades
-  const [deleteToastVisible, setDeleteToastVisible] = useState<boolean>(false);
-  const [errorToastVisible, setErrorToastVisible] = useState<boolean>(false);
+
+  const [errorShowActivityToastVisible, setErrorShowActivityToastVisible] = useState<boolean>(false);
+  const [errorDeleteActivityToastVisible, setErrorDeleteActivityToastVisible] = useState<boolean>(false);
+  const [deleteActivityToastVisible, setDeleteActivityToastVisible] = useState<boolean>(false);
 
   const navigation = useNavigation();
 
@@ -31,7 +33,7 @@ const ActivityComponent: React.FC = () => {
       })
       .catch(err => {
         setActivityList([]);
-        setErrorToastVisible(true);
+        setErrorShowActivityToastVisible(true);
       })
       .finally(() => {
         setLoading(false);
@@ -40,25 +42,42 @@ const ActivityComponent: React.FC = () => {
 
   // mostra o toast de exclusão de atividades por 5 segs
   useEffect(() => {
-    if (deleteToastVisible) {
-      const timer = setTimeout(() => setDeleteToastVisible(false), 5000);
+    const timer = setTimeout(() => {
+      if (deleteActivityToastVisible) {
+        setDeleteActivityToastVisible(false);
+      }
+    }, 5000);
 
-      return () => {
-        clearTimeout(timer);
-      };
-    }
-  }, [deleteToastVisible]);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [deleteActivityToastVisible]);
 
   // mostra o toast de erro por 5 segs
   useEffect(() => {
-    if (errorToastVisible) {
-      const timer = setTimeout(() => setErrorToastVisible(false), 5000);
+    const timer = setTimeout(() => {
+      if (errorShowActivityToastVisible) {
+        setErrorShowActivityToastVisible(false);
+      }
+    }, 5000);
 
-      return () => {
-        clearTimeout(timer);
-      };
-    }
-  }, [errorToastVisible]);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [errorShowActivityToastVisible]);
+
+  // mostra o toast de erro ao excluir atividade por 5 segs
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (errorDeleteActivityToastVisible) {
+        setErrorDeleteActivityToastVisible(false);
+      }
+    }, 5000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [errorDeleteActivityToastVisible]);
 
   // excluir atividade
   const onDeleteActivity = async (id: number) => {
@@ -68,9 +87,11 @@ const ActivityComponent: React.FC = () => {
         const newActivityList = activityList.filter(activity => activity.id !== id);
 
         setActivityList(newActivityList);
-        setDeleteToastVisible(true);
+        setDeleteActivityToastVisible(true);
       })
-      .catch(() => {});
+      .catch(() => {
+        setErrorDeleteActivityToastVisible(true);
+      });
   };
 
   const onUpdateActivity = (activityId: number) => {
@@ -90,7 +111,7 @@ const ActivityComponent: React.FC = () => {
       })
       .catch(err => {
         setActivityList([]);
-        setErrorToastVisible(true);
+        setErrorShowActivityToastVisible(true);
       })
       .finally(() => {
         setRefreshing(false);
@@ -161,20 +182,27 @@ const ActivityComponent: React.FC = () => {
         />
       </View>
 
-      {/* Toast de exclusão de atividades */}
       <Toast
-        onDismiss={() => setDeleteToastVisible(false)}
-        visible={deleteToastVisible}
+        onDismiss={() => setDeleteActivityToastVisible(false)}
+        visible={deleteActivityToastVisible}
         icon="trash-2"
         title="Atividade excluída"
         iconColor={AppColors.YELLOW}
         backgroundColor={AppColors.YELLOW}
       />
 
-      {/* Toast de erro ao mostrar atividades */}
       <Toast
-        onDismiss={() => setErrorToastVisible(false)}
-        visible={errorToastVisible}
+        title="Erro ao excluir atividade"
+        visible={errorDeleteActivityToastVisible}
+        onDismiss={() => setErrorDeleteActivityToastVisible(false)}
+        icon="x"
+        iconColor={AppColors.RED}
+        backgroundColor={AppColors.RED}
+      />
+
+      <Toast
+        onDismiss={() => setErrorShowActivityToastVisible(false)}
+        visible={errorShowActivityToastVisible}
         icon="x"
         title="Erro ao mostrar atividades"
         iconColor={AppColors.RED}

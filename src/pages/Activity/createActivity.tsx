@@ -26,27 +26,27 @@ const CreateActivity: React.FC = () => {
 
   // mostra toast de erro por 5 segs
   useEffect(() => {
-    if (errorToastVisible) {
-      const timer = setTimeout(() => setErrorToastVisible(false), 5000);
+    const timer = setTimeout(() => {
+      setErrorToastVisible(false);
+    }, 5000);
 
-      return () => {
-        clearTimeout(timer);
-      };
-    }
+    return () => {
+      clearTimeout(timer);
+    };
   }, [errorToastVisible]);
 
   // remove o toast de sucesso depois de 5 segundos
   useEffect(() => {
-    if (successToastVisible) {
-      const timer = setTimeout(() => {
+    const timer = setTimeout(() => {
+      if (successToastVisible) {
         setSuccessToastVisible(false);
         navigation.goBack();
-      }, 5000);
+      }
+    }, 5000);
 
-      return () => {
-        clearTimeout(timer);
-      };
-    }
+    return () => {
+      clearTimeout(timer);
+    };
   }, [successToastVisible]);
 
   const onDismissSuccessToast = () => {
@@ -79,7 +79,7 @@ const CreateActivity: React.FC = () => {
         onDismiss={() => setErrorToastVisible(false)}
         visible={errorToastVisible}
         icon="x"
-        title="Erro no cadastro de atividade"
+        title="Erro ao cadastrar atividade"
         iconColor={AppColors.RED}
         backgroundColor={AppColors.RED}
       />
