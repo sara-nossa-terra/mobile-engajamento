@@ -1,84 +1,96 @@
 import React, { useState, useEffect } from 'react';
-import { View, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
-import { Card, Text, TextInput, useTheme } from 'react-native-paper';
-import { useRoute } from '@react-navigation/native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import DropDownPicker from 'react-native-dropdown-picker';
-import { TextInputMask } from 'react-native-masked-text';
+import { View, KeyboardAvoidingView, StyleSheet, Platform } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import AppLoading from '@components/AppLoading';
-import Input from '@components/Input';
-import Button from '@components/Button';
-import Form from '@components/Form';
-import { Formik } from 'formik';
-import { format } from 'date-fns';
-import ptBR from 'date-fns/locale/pt-BR';
-import * as Yup from 'yup';
-import faker from 'faker';
-import { AppColors, Leader, PersonHelped } from '../../types';
+import Toast from '@components/Toast';
+import PersonHelpedForm from '@components/Form/PersonHelped/';
+import api from '@services/Api';
+import { AppColors, PersonHelped } from '../../types';
+import { separeDDDFromPhoneNumber } from '@utils/separeDDDfromPhoneNumber';
 
-const formSchema = Yup.object().shape({
-  birth: Yup.date().required(),
-  name: Yup.string().required(),
-  phone: Yup.string().min(15).required(),
-  leader: Yup.object().shape({
-    label: Yup.string().required(),
-    value: Yup.number().notOneOf([0]).required(),
-  }),
-});
-
-interface RouteParams {
-  personId: number;
-}
-
-interface FormSubmitData {
-  name: string;
-  phone: string;
-  leader: { label: string; value: number }; // value é o ID
-  birth: Date;
+interface SubmitFormData {
+  tx_nome: string;
+  dt_nascimento: Date;
+  nu_telefone: string;
+  leader: { label: string; value: number }; // value é o ID do líder | label o nome do líder
 }
 
 const EditPersonHelped: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [showsDatePicker, setShowsDatePicker] = useState<boolean>(false);
-  const [leaderList, setLeaderList] = useState<Leader[]>([]);
   const [person, setPerson] = useState<PersonHelped>({} as PersonHelped);
 
-  const theme = useTheme();
+  // toasts
+  const [errorToastVisible, setErrorToastVisible] = useState<boolean>(false);
+  const [successToastVisible, setSuccessToastVisible] = useState<boolean>(false);
+
+  const navigation = useNavigation();
   const route = useRoute();
 
+  const { personId } = route.params as { personId: number };
+
   useEffect(() => {
-    /**
-     *
-     * @todo
-     *
-     * requisitar líderes
-     * requisitar pessoa pelo id
-     *
-     */
-    const { personId } = route.params as RouteParams;
-
-    setLeaderList(fakeLeaderList);
-    setPerson({
-      id: personId,
-      leaderId: 0,
-      name: faker.name.findName(),
-      phone: faker.phone.phoneNumber(),
-      birth: faker.date.past(),
-    });
-
-    setLoading(false);
+    api
+      .get(`/v1/helpedPersons/${personId}`)
+      .then(response => {
+        setPerson(response.data.data);
+      })
+      .catch(() => {
+        setErrorToastVisible(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
-  const onSubmit = async (data: FormSubmitData) => {
-    /**
-     * @todo
-     *
-     * Requisitar atualização de pessoa ajudada
-     * Exibir toast de pessoa editada com sucesso
-     * Redirecionar para tela de gerenciamento de pessoas ajudadas
-     *
-     *
-     */
+  // mostra toast de sucesso por 5 segs e redireciona o usuário pra listagem
+  useEffect(() => {
+    if (successToastVisible) {
+      const timer = setTimeout(() => {
+        setSuccessToastVisible(false);
+        navigation.goBack();
+      }, 5000);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [successToastVisible]);
+
+  // mostra toast de erro por 5 segs
+  useEffect(() => {
+    if (errorToastVisible) {
+      const timer = setTimeout(() => {
+        setErrorToastVisible(false);
+      }, 5000);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [errorToastVisible]);
+
+  // edita pessoa ajudada
+  const onSubmit = ({ nu_telefone, tx_nome, leader, dt_nascimento }: SubmitFormData) => {
+    if (leader.value === 0) return;
+
+    const { dddPhoneNumber, phoneNumber } = separeDDDFromPhoneNumber(nu_telefone);
+
+    api
+      .put(`/v1/helpedPersons/${personId}`, {
+        tx_nome,
+        dt_nascimento,
+        lider_id: leader.value,
+        phoneNumber,
+        nu_telefone: phoneNumber,
+        nu_ddd: dddPhoneNumber,
+      })
+      .then(() => {
+        setSuccessToastVisible(true);
+      })
+      .catch(err => {
+        console.log(err.response);
+        setErrorToastVisible(true);
+      });
   };
 
   if (loading) return <AppLoading />;
@@ -86,150 +98,37 @@ const EditPersonHelped: React.FC = () => {
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} enabled>
-        <Formik
-          initialValues={{
-            name: person.name,
-            birth: person.birth,
-            phone: person.phone,
-            leader: { label: '', value: 0 },
-          }}
-          onSubmit={onSubmit}
-          validationSchema={formSchema}
-        >
-          {({ values, errors, touched, handleSubmit, handleChange, setFieldTouched, setFieldValue }) => (
-            <Form title="GERENCIAR PESSOA AJUDADA">
-              <Card.Content style={styles.cardContent}>
-                <Text style={[styles.label, { marginBottom: 5 }]}>Líder</Text>
-
-                <DropDownPicker
-                  items={leaderList.map(leader => ({ label: leader.name, value: leader.id }))}
-                  onChangeItem={item => setFieldValue('leader', item || {})}
-                  defaultValue={values.leader.value || 0}
-                  style={{
-                    borderTopLeftRadius: theme.roundness,
-                    borderTopRightRadius: theme.roundness,
-                    borderBottomLeftRadius: theme.roundness,
-                    borderBottomRightRadius: theme.roundness,
-                    borderColor: errors.leader ? theme.colors.error : theme.colors.disabled,
-                    borderWidth: errors.leader ? 2 : 1,
-                  }}
-                  multiple={false}
-                  containerStyle={{ height: 55, marginLeft: 5 }}
-                  itemStyle={{ justifyContent: 'flex-start' }}
-                  labelStyle={{ fontFamily: 'Montserrat_medium', fontSize: 12 }}
-                  placeholderStyle={{ color: AppColors.INPUT_DISABLE, fontFamily: 'Montserrat_medium', fontSize: 12 }}
-                />
-              </Card.Content>
-
-              <Card.Content style={styles.cardContent}>
-                <Text style={styles.label}>Nome da pessoa</Text>
-                <Input
-                  placeholder="Nome completo"
-                  value={values.name}
-                  error={errors.name && touched.name ? true : false}
-                  onChangeText={handleChange('name')}
-                  onBlur={() => setFieldTouched('name', true)}
-                  theme={theme}
-                />
-              </Card.Content>
-
-              <Card.Content style={styles.cardContent}>
-                <Text style={styles.label}>Data de nascimento</Text>
-
-                <Input
-                  disabled
-                  value={format(new Date(values.birth), 'd - MMM - yyyy', {
-                    locale: ptBR,
-                  })}
-                  style={[{ width: '45%' }, styles.input]}
-                  right={<TextInput.Icon name="calendar-month-outline" onPress={() => setShowsDatePicker(true)} />}
-                  theme={theme}
-                />
-
-                {showsDatePicker && (
-                  <DateTimePicker
-                    value={values.birth}
-                    mode="date"
-                    is24Hour
-                    display="default"
-                    onTouchCancel={() => setShowsDatePicker(false)}
-                    onChange={(e, selectedDate) => {
-                      setShowsDatePicker(false);
-                      if (selectedDate) setFieldValue('birth', selectedDate);
-                    }}
-                  />
-                )}
-              </Card.Content>
-
-              <Card.Content style={styles.cardContent}>
-                <Text style={styles.label}>Telefone</Text>
-
-                <TextInput
-                  keyboardType="numeric"
-                  textContentType="telephoneNumber"
-                  placeholder="(__) _____  -  ____"
-                  error={errors.phone && touched.phone ? true : false}
-                  value={values.phone}
-                  onChangeText={handleChange('phone')}
-                  onBlur={() => setFieldTouched('phone', true)}
-                  style={[styles.input, { width: '65%', paddingLeft: 5 }]}
-                  mode="outlined"
-                  theme={theme}
-                  render={props => (
-                    // @ts-ignore
-                    <TextInputMask
-                      type={'cel-phone'}
-                      options={{
-                        maskType: 'BRL',
-                        withDDD: true,
-                        dddMask: '(99) ',
-                      }}
-                      {...props}
-                    />
-                  )}
-                />
-              </Card.Content>
-
-              <Card.Content style={styles.cardContent}>
-                <View style={styles.buttonContainer}>
-                  <Button onPress={() => handleSubmit()} title="EDITAR PESSOA" />
-                </View>
-              </Card.Content>
-            </Form>
-          )}
-        </Formik>
+        <PersonHelpedForm onSubmit={onSubmit} personHelped={person} />
       </KeyboardAvoidingView>
+
+      <Toast
+        title="Ocorreu um erro"
+        onDismiss={() => setErrorToastVisible(false)}
+        icon="x"
+        iconColor={AppColors.RED}
+        backgroundColor={AppColors.RED}
+        visible={errorToastVisible}
+      />
+
+      <Toast
+        title="Pessoa editada com sucesso"
+        icon="check"
+        iconColor={AppColors.GREEN}
+        backgroundColor={AppColors.BLUE}
+        visible={successToastVisible}
+        onDismiss={() => {
+          setSuccessToastVisible(false);
+          navigation.goBack();
+        }}
+      />
     </View>
   );
 };
-
-const fakeLeaderList: Leader[] = [
-  { id: 0, name: 'Selecíone um líder', phone: '(61) 99999-9999', email: 'email@email.com', birth: new Date() },
-  { id: 1, name: 'Valdemir', phone: '(61) 99999-9999', email: 'email@email.com', birth: new Date() },
-  { id: 2, name: 'Rafael', phone: '(61) 99999-9999', email: 'email@email.com', birth: new Date() },
-  { id: 3, name: 'Thiago', phone: '(61) 99999-9999', email: 'email@email.com', birth: new Date() },
-];
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: AppColors.BLUE,
-  },
-  cardContent: {
-    marginBottom: 10,
-  },
-  label: {
-    fontFamily: 'Montserrat_medium',
-    fontSize: 12,
-  },
-  input: {
-    backgroundColor: '#ffff',
-    fontSize: 12,
-    fontFamily: 'Montserrat_medium',
-  },
-  buttonContainer: {
-    marginTop: 22,
-    marginBottom: 15,
   },
 });
 

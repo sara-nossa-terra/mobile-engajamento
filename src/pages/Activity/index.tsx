@@ -7,46 +7,70 @@ import AppLoading from '@components/AppLoading';
 import Button from '@components/Button';
 import Toast from '@components/Toast';
 import { Feather as Icon } from '@expo/vector-icons';
-import { format } from 'date-fns';
-import localePtBR from 'date-fns/locale/pt-BR';
-import faker from 'faker';
+import format from 'date-fns/format';
+import ptBR from 'date-fns/locale/pt-BR';
 import { Activity, AppColors } from '../../types';
+import api from '@services/Api';
+import { formatAmericanDatetimeToDate } from '@utils/formatAmericanDatetimeToDate';
 
 const ActivityComponent: React.FC = () => {
   const [activityList, setActivityList] = useState<Activity[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // carregando este componente
   const [refreshing, setRefreshing] = useState<boolean>(false); // refresh na listagem de atividades
-  const [toastVisible, setToastVisible] = useState<boolean>(false);
+  const [deleteToastVisible, setDeleteToastVisible] = useState<boolean>(false);
+  const [errorToastVisible, setErrorToastVisible] = useState<boolean>(false);
 
   const navigation = useNavigation();
 
   useEffect(() => {
-    setActivityList(fakeActivityList);
-    setLoading(false);
+    api
+      .get('/v1/activities')
+      .then(response => {
+        const data = response.data.data as Activity[];
+        setActivityList(data);
+      })
+      .catch(err => {
+        setActivityList([]);
+        setErrorToastVisible(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
+  // mostra o toast de exclusão de atividades por 5 segs
   useEffect(() => {
-    if (toastVisible) {
-      const timer = setTimeout(() => setToastVisible(false), 5000);
+    if (deleteToastVisible) {
+      const timer = setTimeout(() => setDeleteToastVisible(false), 5000);
 
       return () => {
         clearTimeout(timer);
       };
     }
-  }, [toastVisible]);
+  }, [deleteToastVisible]);
 
+  // mostra o toast de erro por 5 segs
+  useEffect(() => {
+    if (errorToastVisible) {
+      const timer = setTimeout(() => setErrorToastVisible(false), 5000);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [errorToastVisible]);
+
+  // excluir atividade
   const onDeleteActivity = async (id: number) => {
-    /**
-     *
-     * @todo
-     * requisição para deletar atividade
-     *
-     */
+    api
+      .delete(`/v1/activities/${id}`)
+      .then(() => {
+        const newActivityList = activityList.filter(activity => activity.id !== id);
 
-    const newActivityList = activityList.filter(activity => activity.id !== id);
-
-    setActivityList(newActivityList);
-    setToastVisible(true);
+        setActivityList(newActivityList);
+        setDeleteToastVisible(true);
+      })
+      .catch(() => {});
   };
 
   const onUpdateActivity = (activityId: number) => {
@@ -54,12 +78,23 @@ const ActivityComponent: React.FC = () => {
     navigation.navigate('EditActivityStack', { activityId });
   };
 
-  const onRefresh = () => {
+  // ao atualizar a listagem de atividades
+  const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setActivityList(fakeActivityList);
-      setRefreshing(false);
-    }, 2000);
+
+    api
+      .get('/v1/activities')
+      .then(response => {
+        const data = response.data.data as Activity[];
+        setActivityList(data);
+      })
+      .catch(err => {
+        setActivityList([]);
+        setErrorToastVisible(true);
+      })
+      .finally(() => {
+        setRefreshing(false);
+      });
   };
 
   if (loading) return <AppLoading />;
@@ -83,12 +118,11 @@ const ActivityComponent: React.FC = () => {
           renderItem={({ item }) => (
             <View key={item.id} style={styles.activity}>
               <View style={styles.activityInfo}>
-                <Text style={styles.activityName} children={item.name} />
+                <Text style={styles.activityName} children={item.tx_nome} />
                 <Text
                   style={styles.activityDate}
-                  children={format(new Date(item.day), "EEEE '-' dd/MM", {
-                    locale: localePtBR,
-                  })}
+                  // @ts-ignore
+                  children={format(formatAmericanDatetimeToDate(item.dt_dia), "EEEE '-' dd/MM", { locale: ptBR })}
                 />
               </View>
               <View style={styles.activityActionsContainer}>
@@ -129,32 +163,26 @@ const ActivityComponent: React.FC = () => {
 
       {/* Toast de exclusão de atividades */}
       <Toast
-        onDismiss={() => setToastVisible(false)}
-        visible={toastVisible}
+        onDismiss={() => setDeleteToastVisible(false)}
+        visible={deleteToastVisible}
         icon="trash-2"
         title="Atividade excluída"
         iconColor={AppColors.YELLOW}
         backgroundColor={AppColors.YELLOW}
       />
+
+      {/* Toast de erro ao mostrar atividades */}
+      <Toast
+        onDismiss={() => setErrorToastVisible(false)}
+        visible={errorToastVisible}
+        icon="x"
+        title="Erro ao mostrar atividades"
+        iconColor={AppColors.RED}
+        backgroundColor={AppColors.RED}
+      />
     </View>
   );
 };
-
-const fakeActivityList = [
-  { id: faker.random.number(), name: faker.random.word(), day: faker.date.recent() },
-  { id: faker.random.number(), name: faker.random.word(), day: faker.date.recent() },
-  { id: faker.random.number(), name: faker.random.word(), day: faker.date.recent() },
-  { id: faker.random.number(), name: faker.random.word(), day: faker.date.recent() },
-  { id: faker.random.number(), name: faker.random.word(), day: faker.date.recent() },
-  { id: faker.random.number(), name: faker.random.word(), day: faker.date.recent() },
-  { id: faker.random.number(), name: faker.random.word(), day: faker.date.recent() },
-  { id: faker.random.number(), name: faker.random.word(), day: faker.date.recent() },
-  { id: faker.random.number(), name: faker.random.word(), day: faker.date.recent() },
-  { id: faker.random.number(), name: faker.random.word(), day: faker.date.recent() },
-  { id: faker.random.number(), name: faker.random.word(), day: faker.date.recent() },
-  { id: faker.random.number(), name: faker.random.word(), day: faker.date.recent() },
-  { id: faker.random.number(), name: faker.random.word(), day: faker.date.recent() },
-];
 
 const styles = StyleSheet.create({
   container: {

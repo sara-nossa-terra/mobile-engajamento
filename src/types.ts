@@ -17,24 +17,26 @@ export interface User {
 
 export interface Activity {
   id: number;
-  name: string;
-  day: Date;
+  tx_nome: string;
+  dt_dia: string;
 }
 
 export interface Leader {
   id: number;
-  name: string;
-  phone: string;
+  tx_nome: string;
   email: string;
-  birth: Date;
+  dt_nascimento: Date;
+  nu_ddd: number;
+  nu_telefone: number;
+  lider_id: Leader | null;
 }
 
 export interface PersonHelped {
   id: number;
-  name: string;
-  phone: string;
-  birth: Date;
-  leaderId: number;
+  tx_nome: string;
+  dt_nascimento: Date;
+  nu_ddd: number;
+  nu_telefone: number;
 }
 
 export interface LifeReview {}

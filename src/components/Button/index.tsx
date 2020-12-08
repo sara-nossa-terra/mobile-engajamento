@@ -3,9 +3,9 @@ import { StyleSheet, ButtonProps } from 'react-native';
 import { Button, Text } from 'native-base';
 import { AppColors } from '../../types';
 
-const ButtonComponent: React.FC<ButtonProps> = ({ title, onPress, color = AppColors.GREEN }) => {
+const ButtonComponent: React.FC<ButtonProps> = ({ title, onPress, disabled = false, color = AppColors.GREEN }) => {
   return (
-    <Button rounded style={[styles.button, { backgroundColor: color }]} onPress={() => onPress({})}>
+    <Button disabled={disabled} rounded style={[styles.button, { backgroundColor: color }]} onPress={() => onPress({})}>
       <Text style={styles.text}>{title}</Text>
     </Button>
   );

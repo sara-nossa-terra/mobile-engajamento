@@ -1,71 +1,97 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { useRoute } from '@react-navigation/native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Card, useTheme, TextInput, Text } from 'react-native-paper';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import FormActivity from '@components/Form/Activity';
 import AppLoading from '@components/AppLoading';
-import Form from '@components/Form';
-import Input from '@components/Input';
-import Button from '@components/Button';
-import { Formik } from 'formik';
-import { format } from 'date-fns';
-import ptBR from 'date-fns/locale/pt-BR';
-import { Activity, AppColors } from '../../types';
+import Toast from '@components/Toast';
 import * as Yup from 'yup';
-import faker from 'faker';
+import api from '@services/Api';
+import { formatAmericanDatetimeToDate, formatDateToAmericanDatetime } from '@utils/formatAmericanDatetimeToDate';
+import { Activity, AppColors } from '../../types';
 
 interface RouteParams {
   activityId: number;
 }
 
 interface SubmitFormData {
-  id: number;
-  name: string;
-  day: Date;
+  tx_nome: string;
+  dt_dia: Date;
 }
 
 const formSchema = Yup.object().shape({
-  name: Yup.string().required(),
-  date: Yup.date(),
+  tx_nome: Yup.string().required(),
+  dt_dia: Yup.date(),
 });
 
 const EditActivity: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [showsDatePicker, setShowsDatePicker] = useState<boolean>(false); // picker de data
   const [activity, setActivity] = useState<Activity>({} as Activity);
+  const [errorToastVisible, setErrorToastVisible] = useState<boolean>(false);
+  const [successToastVisible, setSuccessToastVisible] = useState<boolean>(false);
 
   const route = useRoute();
-  const theme = useTheme();
+  const navigation = useNavigation();
+
+  const { activityId = 0 } = route.params as RouteParams;
 
   useEffect(() => {
-    /**
-     *
-     * @todo
-     *
-     * carregar a atividade do backend pelo id
-     *
-     */
-    const { activityId } = route.params as RouteParams;
-
-    const fakeActivity: Activity = {
-      id: activityId,
-      day: faker.date.recent(),
-      name: faker.lorem.words(),
-    };
-
-    setActivity(fakeActivity);
-    setLoading(false);
+    api
+      .get(`/v1/activities/${activityId}`)
+      .then(response => {
+        setActivity({ ...response.data.data, dt_dia: formatAmericanDatetimeToDate(response.data.data.dt_dia) });
+        setLoading(false);
+      })
+      .catch(navigation.goBack);
   }, []);
 
-  const onSubmit = async (data: SubmitFormData) => {
-    /**
-     *
-     * @todo
-     *
-     * Requisitar atualização da atividade
-     * Redirecionar para a página de gerenciamento de atividades
-     *
-     */
+  // mostra o toast de erro por 5 segs
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (errorToastVisible) {
+        setErrorToastVisible(false);
+        navigation.goBack();
+      }
+    }, 5000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [errorToastVisible]);
+
+  // mostra o toast de erro por 5 segs
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (successToastVisible) {
+        setSuccessToastVisible(false);
+        navigation.goBack();
+      }
+    }, 5000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [successToastVisible]);
+
+  const onDismissSuccessToast = async () => {
+    setSuccessToastVisible(false);
+    navigation.goBack();
+  };
+
+  const onDismissErrorToast = async () => {
+    setErrorToastVisible(false);
+    navigation.goBack();
+  };
+
+  // atualiza as atividades
+  const onSubmit = async ({ tx_nome, dt_dia }: SubmitFormData) => {
+    api
+      .put(`/v1/activities/${activityId}`, { tx_nome, dt_dia: formatDateToAmericanDatetime(dt_dia) })
+      .then(() => {
+        setSuccessToastVisible(true);
+      })
+      .catch(err => {
+        setErrorToastVisible(true);
+      });
   };
 
   if (loading) return <AppLoading />;
@@ -73,68 +99,28 @@ const EditActivity: React.FC = () => {
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} enabled>
-        <Formik
-          initialValues={{
-            name: activity.name,
-            day: activity.day,
-            id: activity.id,
-          }}
-          onSubmit={onSubmit}
-          validationSchema={formSchema}
-        >
-          {({ values, errors, handleSubmit, handleBlur, setFieldValue }) => (
-            <Form title="ATIVIDADE">
-              <Card.Content style={styles.cardContent}>
-                <Text style={styles.label}>Nome da atividade</Text>
-
-                <Input
-                  value={values.name}
-                  placeholder="Nome da atividade"
-                  onChangeText={text => setFieldValue('name', text)}
-                  onBlur={handleBlur('name')}
-                  error={errors.name ? true : false}
-                  theme={theme}
-                />
-              </Card.Content>
-
-              <Card.Content style={styles.cardContent}>
-                <Text style={styles.label}>Dia da atividade</Text>
-
-                <Input
-                  disabled
-                  style={{ width: '45%' }}
-                  value={format(values.day, 'd - MMM - yyyy', {
-                    locale: ptBR,
-                  })}
-                  right={<TextInput.Icon name="calendar-month-outline" onPress={() => setShowsDatePicker(true)} />}
-                  theme={theme}
-                />
-
-                {showsDatePicker && (
-                  <DateTimePicker
-                    value={values.day}
-                    mode="date"
-                    is24Hour
-                    display="default"
-                    minimumDate={new Date()}
-                    onTouchCancel={() => setShowsDatePicker(false)}
-                    onChange={(e, selectedDate) => {
-                      setShowsDatePicker(false);
-                      if (selectedDate) setFieldValue('day', selectedDate);
-                    }}
-                  />
-                )}
-              </Card.Content>
-
-              <Card.Content style={styles.cardContent}>
-                <View style={styles.buttonContainer}>
-                  <Button onPress={() => handleSubmit()} title="EDITAR ATIVIDADE" />
-                </View>
-              </Card.Content>
-            </Form>
-          )}
-        </Formik>
+        <FormActivity activity={activity} onSubmit={onSubmit} />
       </KeyboardAvoidingView>
+
+      {/* Toast de erro ao mostrar atividade */}
+      <Toast
+        onDismiss={onDismissErrorToast}
+        visible={errorToastVisible}
+        icon="x"
+        title="Erro ao cadastrar atividade"
+        iconColor={AppColors.RED}
+        backgroundColor={AppColors.RED}
+      />
+
+      {/* Toast de erro ao mostrar atividade */}
+      <Toast
+        onDismiss={onDismissSuccessToast}
+        visible={successToastVisible}
+        icon="check"
+        title="Atividade editada com sucesso"
+        iconColor={AppColors.GREEN}
+        backgroundColor={AppColors.BLUE}
+      />
     </View>
   );
 };
@@ -143,16 +129,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: AppColors.BLUE,
     flex: 1,
-  },
-  cardContent: {
-    marginBottom: 10,
-  },
-  label: {
-    fontFamily: 'Montserrat_medium',
-    fontSize: 12,
-  },
-  buttonContainer: {
-    marginVertical: 15,
   },
 });
 

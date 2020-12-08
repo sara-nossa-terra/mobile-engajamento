@@ -31,6 +31,7 @@ const Login: React.FC = () => {
       try {
         await login({ email, password });
       } catch (err) {
+        console.log('ocorreu um erro', err.response);
         setError(true);
       }
     },

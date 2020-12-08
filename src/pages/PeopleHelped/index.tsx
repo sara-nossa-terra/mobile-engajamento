@@ -6,7 +6,7 @@ import { Feather as Icon } from '@expo/vector-icons';
 import Button from '@components/Button';
 import AppLoading from '@components/AppLoading';
 import Toast from '@components/Toast';
-import faker from 'faker';
+import api from '@services/Api';
 import { AppColors, PersonHelped } from '../../types';
 
 const PeopleHelped: React.FC = () => {
@@ -14,14 +14,25 @@ const PeopleHelped: React.FC = () => {
   const [refreshing, setRefreshing] = useState<boolean>(false); // refresh na listagem de pessoas
   const [personHelpedList, setPersonHelpedList] = useState<PersonHelped[]>([]);
   const [deletePersonHelpedToastVisible, setDeletePersonHelpedToastVisible] = useState<boolean>(false);
+  const [errorToastVisible, setErrorToastVisible] = useState<boolean>(false);
 
   const navigation = useNavigation();
 
   useEffect(() => {
-    setPersonHelpedList(fakePersonHelpedList);
-    setLoading(false);
+    api
+      .get('/v1/helpedPersons')
+      .then(response => {
+        setPersonHelpedList(response.data.data);
+      })
+      .catch(() => {
+        setErrorToastVisible(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
+  // mostra toast de exclusão de pessoas ajudadas  por 5 segs
   useEffect(() => {
     if (deletePersonHelpedToastVisible) {
       const timer = setTimeout(() => {
@@ -34,29 +45,51 @@ const PeopleHelped: React.FC = () => {
     }
   }, [deletePersonHelpedToastVisible]);
 
+  // mostra toast de erro ao mostrar atividades por 5 segs
+  useEffect(() => {
+    if (errorToastVisible) {
+      const timer = setTimeout(() => {
+        setErrorToastVisible(false);
+      }, 5000);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [errorToastVisible]);
+
   // atualizar lista pessoas ajudadas
   const onRefresh = async () => {
     setRefreshing(true);
 
-    setTimeout(() => {
-      setPersonHelpedList(fakePersonHelpedList);
-      setRefreshing(false);
-    }, 2000);
+    api
+      .get('/v1/helpedPersons')
+      .then(response => {
+        setPersonHelpedList(response.data.data);
+      })
+      .catch(() => {
+        setPersonHelpedList([]);
+        setErrorToastVisible(true);
+      })
+      .finally(() => {
+        setRefreshing(false);
+      });
   };
 
+  // exclusão de pessoa ajudada
   const onDeletePerson = async (id: number) => {
-    /**
-     *
-     * @todo
-     * requisição para deletar atividade
-     *
-     */
+    api
+      .delete(`/v1/helpedPersons/${id}`)
+      .then(() => {
+        const peopleHelpedList = personHelpedList.filter(person => person.id !== id);
+        setPersonHelpedList(peopleHelpedList);
 
-    const peopleHelpedList = personHelpedList.filter(person => person.id !== id);
-    setPersonHelpedList(peopleHelpedList);
-
-    // mostra toast de exclusão por 5 segundos
-    setDeletePersonHelpedToastVisible(true);
+        // mostra toast de exclusão por 5 segundos
+        setDeletePersonHelpedToastVisible(true);
+      })
+      .catch(() => {
+        setDeletePersonHelpedToastVisible(true);
+      });
   };
 
   const onUpdatePersonHelped = (personId: number) => {
@@ -85,9 +118,9 @@ const PeopleHelped: React.FC = () => {
           renderItem={({ item }) => (
             <View key={item.id} style={styles.personHelpedContainer}>
               <View style={styles.personInfo}>
-                <Text style={styles.personName} children={item.name} />
-                <Text style={styles.personPhone} children={item.phone} />
-                <Text style={styles.personLeader} children={`Líder: ${item.leader}`} />
+                <Text style={styles.personName} children={item.tx_nome} />
+                <Text style={styles.personPhone} children={`(${item.nu_ddd}) ${item.nu_telefone}`} />
+                {/* <Text style={styles.personLeader} children={`Líder: ${item.leader}`} /> */}
               </View>
               <View style={styles.personActions}>
                 <TouchableOpacity
@@ -133,78 +166,18 @@ const PeopleHelped: React.FC = () => {
         icon="trash-2"
         visible={deletePersonHelpedToastVisible}
       />
+
+      <Toast
+        title="ERRO AO MOSTRAR PESSOAS AJUDADAS"
+        onDismiss={() => {}}
+        backgroundColor={AppColors.RED}
+        iconColor={AppColors.RED}
+        icon="x"
+        visible={errorToastVisible}
+      />
     </View>
   );
 };
-
-const fakePersonHelpedList: PersonHelped[] = [
-  {
-    id: faker.random.number(),
-    name: faker.name.findName(),
-    phone: faker.phone.phoneNumberFormat(2),
-    leader: faker.name.findName(),
-  },
-  {
-    id: faker.random.number(),
-    name: faker.name.findName(),
-    phone: faker.phone.phoneNumberFormat(2),
-    leader: faker.name.findName(),
-  },
-  {
-    id: faker.random.number(),
-    name: faker.name.findName(),
-    phone: faker.phone.phoneNumberFormat(2),
-    leader: faker.name.findName(),
-  },
-  {
-    id: faker.random.number(),
-    name: faker.name.findName(),
-    phone: faker.phone.phoneNumberFormat(2),
-    leader: faker.name.findName(),
-  },
-  {
-    id: faker.random.number(),
-    name: faker.name.findName(),
-    phone: faker.phone.phoneNumberFormat(2),
-    leader: faker.name.findName(),
-  },
-  {
-    id: faker.random.number(),
-    name: faker.name.findName(),
-    phone: faker.phone.phoneNumberFormat(2),
-    leader: faker.name.findName(),
-  },
-  {
-    id: faker.random.number(),
-    name: faker.name.findName(),
-    phone: faker.phone.phoneNumberFormat(2),
-    leader: faker.name.findName(),
-  },
-  {
-    id: faker.random.number(),
-    name: faker.name.findName(),
-    phone: faker.phone.phoneNumberFormat(2),
-    leader: faker.name.findName(),
-  },
-  {
-    id: faker.random.number(),
-    name: faker.name.findName(),
-    phone: faker.phone.phoneNumberFormat(2),
-    leader: faker.name.findName(),
-  },
-  {
-    id: faker.random.number(),
-    name: faker.name.findName(),
-    phone: faker.phone.phoneNumberFormat(2),
-    leader: faker.name.findName(),
-  },
-  {
-    id: faker.random.number(),
-    name: faker.name.findName(),
-    phone: faker.phone.phoneNumberFormat(2),
-    leader: faker.name.findName(),
-  },
-];
 
 const styles = StyleSheet.create({
   container: {
