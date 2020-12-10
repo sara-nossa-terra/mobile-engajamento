@@ -26,7 +26,7 @@ const PeopleHelped: React.FC = () => {
         const data = response.data.data as PersonHelped[];
         setPersonHelpedList(data);
       })
-      .catch((e) => {
+      .catch(e => {
         setPersonHelpedList([]);
         setErrorShowPeopleHelpedToastVisible(true);
       })
@@ -173,7 +173,7 @@ const PeopleHelped: React.FC = () => {
       />
 
       <Toast
-        title="ERRO AO MOSTRAR PESSOAS AJUDADAS"
+        title="Não foi possível mostrar as pessoas ajudadas"
         onDismiss={() => setErrorShowPeopleHelpedToastVisible(false)}
         backgroundColor={AppColors.RED}
         iconColor={AppColors.RED}

@@ -170,7 +170,7 @@ const LeaderComponent: React.FC = () => {
         onDismiss={() => setErrorDeleteLeaderVisible(false)}
         visible={errorDeleteLeaderVisible}
         icon="x"
-        title="Erro ao excluir líder"
+        title="Não foi possível excluir o líder"
         iconColor={AppColors.RED}
         backgroundColor={AppColors.RED}
       />

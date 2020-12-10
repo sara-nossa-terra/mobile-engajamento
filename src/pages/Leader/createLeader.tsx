@@ -102,7 +102,7 @@ const CreateLeader: React.FC = () => {
       />
 
       <Toast
-        title="Erro ao cadastrar líder"
+        title="Não foi possível cadastrar o líder"
         backgroundColor={AppColors.RED}
         icon="x"
         iconColor={AppColors.RED}

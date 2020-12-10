@@ -86,7 +86,7 @@ const CreatePeopleHelped: React.FC = () => {
       </KeyboardAvoidingView>
 
       <Toast
-        title="Erro ao cadastrar pessoa"
+        title="Não foi possível cadastrar a pessoa"
         onDismiss={() => setErrorToastVisible(false)}
         icon="x"
         iconColor={AppColors.RED}

@@ -115,7 +115,7 @@ const EditPersonHelped: React.FC = () => {
       </KeyboardAvoidingView>
 
       <Toast
-        title="Erro ao atualizar pessoa"
+        title="Não foi possível atualizar a pessoa"
         onDismiss={() => setErrorUpdatePersonToastVisible(false)}
         icon="x"
         iconColor={AppColors.RED}
@@ -124,7 +124,7 @@ const EditPersonHelped: React.FC = () => {
       />
 
       <Toast
-        title="Erro ao mostrar pessoa"
+        title="Não foi possível mostrar a pessoa"
         onDismiss={() => setErrorShowPersonToastVisible(false)}
         icon="x"
         iconColor={AppColors.RED}

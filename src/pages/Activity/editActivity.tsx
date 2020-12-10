@@ -119,7 +119,7 @@ const EditActivity: React.FC = () => {
         onDismiss={onDismissErrorToast}
         visible={errorToastVisible}
         icon="x"
-        title="Erro ao cadastrar atividade"
+        title="Não foi possível cadastrar atividade"
         iconColor={AppColors.RED}
         backgroundColor={AppColors.RED}
       />
@@ -137,7 +137,7 @@ const EditActivity: React.FC = () => {
         onDismiss={() => setErrorShowActivityToastVisible(false)}
         visible={errorShowActivityToastVisible}
         icon="x"
-        title="Erro ao mostrar atividade"
+        title="Não foi possível mostrar a atividade"
         iconColor={AppColors.RED}
         backgroundColor={AppColors.RED}
       />

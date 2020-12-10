@@ -192,7 +192,7 @@ const ActivityComponent: React.FC = () => {
       />
 
       <Toast
-        title="Erro ao excluir atividade"
+        title="Não foi possível excluir a atividade"
         visible={errorDeleteActivityToastVisible}
         onDismiss={() => setErrorDeleteActivityToastVisible(false)}
         icon="x"
@@ -204,7 +204,7 @@ const ActivityComponent: React.FC = () => {
         onDismiss={() => setErrorShowActivityToastVisible(false)}
         visible={errorShowActivityToastVisible}
         icon="x"
-        title="Erro ao mostrar atividades"
+        title="Não foi possível mostrar as atividades"
         iconColor={AppColors.RED}
         backgroundColor={AppColors.RED}
       />

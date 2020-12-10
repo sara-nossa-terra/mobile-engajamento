@@ -109,7 +109,7 @@ const EditLeader: React.FC = () => {
       </KeyboardAvoidingView>
 
       <Toast
-        title="Ocorreu um erro ao mostrar o líder"
+        title="Não foi possível mostrar o líder"
         icon="x"
         backgroundColor={AppColors.RED}
         iconColor={AppColors.RED}
@@ -118,7 +118,7 @@ const EditLeader: React.FC = () => {
       />
 
       <Toast
-        title="Ocorreu um erro ao atualizar o líder"
+        title="Não foi possível atualizar o líder"
         icon="x"
         backgroundColor={AppColors.RED}
         iconColor={AppColors.RED}

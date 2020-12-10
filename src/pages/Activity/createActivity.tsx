@@ -79,7 +79,7 @@ const CreateActivity: React.FC = () => {
         onDismiss={() => setErrorToastVisible(false)}
         visible={errorToastVisible}
         icon="x"
-        title="Erro ao cadastrar atividade"
+        title="Não foi possível cadastrar a atividade"
         iconColor={AppColors.RED}
         backgroundColor={AppColors.RED}
       />
