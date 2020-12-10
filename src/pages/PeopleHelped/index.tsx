@@ -26,7 +26,7 @@ const PeopleHelped: React.FC = () => {
         const data = response.data.data as PersonHelped[];
         setPersonHelpedList(data);
       })
-      .catch(() => {
+      .catch((e) => {
         setPersonHelpedList([]);
         setErrorShowPeopleHelpedToastVisible(true);
       })

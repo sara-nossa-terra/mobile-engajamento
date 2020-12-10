@@ -23,6 +23,8 @@ const Login: React.FC = () => {
   const [remember, setRemember] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
+  const [MessageError, setMessageError] = useState<string>("");
+
   const { login } = useAuth();
   const theme = useTheme();
 
@@ -31,7 +33,11 @@ const Login: React.FC = () => {
       try {
         await login({ email, password });
       } catch (err) {
-        console.log('ocorreu um erro', err.response);
+        if (err.status == 401 && err.data.error) {
+          setMessageError('Usuário e/ou senha incorretos!\n Tente novamente.');
+        } else if (err.status == 500) {
+          setMessageError('Não foi possível fazer login! Favor tente novamente mais tarde.');
+        }
         setError(true);
       }
     },
@@ -49,7 +55,15 @@ const Login: React.FC = () => {
           password: '',
         }}
       >
-        {({ values, errors, touched, setFieldTouched, handleBlur, handleSubmit, handleChange }) => (
+        {({
+            values,
+            errors,
+            touched,
+            setFieldTouched,
+            handleBlur,
+            handleSubmit,
+            handleChange
+          }) => (
           <React.Fragment>
             {error && (
               <View style={styles.errorContainer}>
@@ -59,8 +73,7 @@ const Login: React.FC = () => {
                     <Icon name="information" size={30} color={AppColors.RED} />
                   </View>
                   <Text style={styles.errorText}>
-                    Login / Senha incorretos{'\n'}
-                    Tente novamente.
+                    {MessageError}
                   </Text>
                 </View>
               </View>
