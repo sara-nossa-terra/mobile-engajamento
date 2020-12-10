@@ -63,7 +63,7 @@ const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   const logOut = useCallback(async () => {
-    await AsyncStorage.removeItem('@Engajamento:token');
+    await AsyncStorage.multiRemove(['@Engajamento:token', '@Engajamento:user']);
 
     setData({} as AuthState);
   }, []);
