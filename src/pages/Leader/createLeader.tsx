@@ -70,7 +70,7 @@ const CreateLeader: React.FC = () => {
       .post('/v1/leaders', {
         tx_nome,
         dt_nascimento,
-        email,
+        email : email.toLowerCase(),
         password,
         lider_id: auth.user.id,
         nu_ddd: dddPhoneNumber,

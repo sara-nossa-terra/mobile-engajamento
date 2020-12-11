@@ -8,11 +8,14 @@ import AppLoading from '@components/AppLoading';
 import Toast from '@components/Toast';
 import api from '@services/Api';
 import { AppColors, PersonHelped } from '../../types';
+import { useAuth } from '@hooks/Auth';
 
 const PeopleHelped: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true); // carregando componente
   const [refreshing, setRefreshing] = useState<boolean>(false); // refresh na listagem de pessoas
   const [personHelpedList, setPersonHelpedList] = useState<PersonHelped[]>([]);
+
+  const auth = useAuth();
 
   const [deletePersonHelpedToastVisible, setDeletePersonHelpedToastVisible] = useState<boolean>(false);
   const [errorShowPeopleHelpedToastVisible, setErrorShowPeopleHelpedToastVisible] = useState<boolean>(false);
@@ -20,8 +23,12 @@ const PeopleHelped: React.FC = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
+    const url = (auth.user.id === 1)
+      ? '/v1/helpedPersons/'
+      : `/v1/helpedPersons/leader/${auth.user.id}`;
+
     api
-      .get('/v1/helpedPersons')
+      .get(url)
       .then(response => {
         const data = response.data.data as PersonHelped[];
         setPersonHelpedList(data);
@@ -65,8 +72,12 @@ const PeopleHelped: React.FC = () => {
   const onRefresh = async () => {
     setRefreshing(true);
 
+    const url = (auth.user.id === 1)
+      ? '/v1/helpedPersons/'
+      : `/v1/helpedPersons/leader/${auth.user.id}`;
+
     api
-      .get('/v1/helpedPersons')
+      .get(url)
       .then(response => {
         const data = response.data.data as PersonHelped[];
         setPersonHelpedList(data);
