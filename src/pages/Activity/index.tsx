@@ -25,6 +25,11 @@ const ActivityComponent: React.FC = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
+    // atualiza as atividades quando a tela é focada de novo (quando o usuário volta da página de cadastro de atividades)
+    navigation.addListener('focus', () => {
+      if (!loading) onRefresh();
+    });
+
     api
       .get('/v1/activities')
       .then(response => {
@@ -38,6 +43,10 @@ const ActivityComponent: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
+
+    return () => {
+      navigation.removeListener('focus', () => {});
+    };
   }, []);
 
   // mostra o toast de exclusão de atividades por 5 segs
@@ -100,7 +109,7 @@ const ActivityComponent: React.FC = () => {
   };
 
   // ao atualizar a listagem de atividades
-  const onRefresh = async () => {
+  const onRefresh = () => {
     setRefreshing(true);
 
     api

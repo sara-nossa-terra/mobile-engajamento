@@ -35,13 +35,18 @@ const AuthProvider: React.FC = ({ children }) => {
         api.defaults.headers.authorization = `Bearer ${token[1]}`;
         setData({ token: token[1], user: JSON.parse(user[1]) });
 
-        api.interceptors.response.use(async response => {
-          if (response.status === 401 || response.status === 422) {
-            await logOut();
-          }
+        api.interceptors.response.use(
+          response => {
+            return response;
+          },
+          error => {
+            if ([401, 422].includes(error.response.status)) {
+              logOut();
+            }
 
-          return response;
-        });
+            return error;
+          },
+        );
       }
 
       setLoading(false);
@@ -71,9 +76,11 @@ const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   const logOut = useCallback(async () => {
-    await AsyncStorage.multiRemove(['@Engajamento:token', '@Engajamento:user']);
-
-    setData({} as AuthState);
+    AsyncStorage.multiRemove(['@Engajamento:token', '@Engajamento:user'])
+      .then(() => {
+        setData({} as AuthState);
+      })
+      .catch(() => {});
   }, []);
 
   return (

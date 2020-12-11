@@ -23,10 +23,12 @@ const PeopleHelped: React.FC = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    const url = (auth.user.id === 1)
-      ? '/v1/helpedPersons/'
-      : `/v1/helpedPersons/leader/${auth.user.id}`;
+    // atualiza a lista de pessoas quando a página é focada (quando o usuário retorna da tela de cadastro de pessoas)
+    navigation.addListener('focus', () => {
+      if (!loading) onRefresh();
+    });
 
+    const url = auth.user.id === 1 ? '/v1/helpedPersons/' : `/v1/helpedPersons/leader/${auth.user.id}`;
     api
       .get(url)
       .then(response => {
@@ -40,6 +42,10 @@ const PeopleHelped: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
+
+    return () => {
+      navigation.removeListener('focus', () => {});
+    };
   }, []);
 
   // mostra toast de exclusão de pessoas ajudadas  por 5 segs
@@ -69,12 +75,10 @@ const PeopleHelped: React.FC = () => {
   }, [errorShowPeopleHelpedToastVisible]);
 
   // atualizar lista pessoas ajudadas
-  const onRefresh = async () => {
+  const onRefresh = () => {
     setRefreshing(true);
 
-    const url = (auth.user.id === 1)
-      ? '/v1/helpedPersons/'
-      : `/v1/helpedPersons/leader/${auth.user.id}`;
+    const url = auth.user.id === 1 ? '/v1/helpedPersons/' : `/v1/helpedPersons/leader/${auth.user.id}`;
 
     api
       .get(url)
