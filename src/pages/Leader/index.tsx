@@ -21,7 +21,7 @@ const LeaderComponent: React.FC = () => {
 
   useEffect(() => {
     // atualiza a lista de líderes quando a página é focada (quando o usuário volta da página de cadastro de líderes)
-    navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener('focus', () => {
       if (!loading) onRefresh();
     });
 
@@ -40,7 +40,7 @@ const LeaderComponent: React.FC = () => {
       });
 
     return () => {
-      navigation.removeListener('focus', () => {});
+      unsubscribe;
     };
   }, []);
 

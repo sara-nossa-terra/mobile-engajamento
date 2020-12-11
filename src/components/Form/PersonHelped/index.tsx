@@ -56,7 +56,7 @@ const FormPersonHelped: React.FC<FormPersonHelpedProps> = ({ personHelped, onSub
       initialValues={{
         tx_nome: personHelped.tx_nome || '',
         nu_telefone: `(${personHelped.nu_ddd || ''}) ${personHelped.nu_telefone || ''}`,
-        dt_nascimento: personHelped.dt_nascimento || new Date(2000, 0, 1),
+        dt_nascimento: personHelped.dt_nascimento || new Date(),
         leader: { label: '', value: 0 },
       }}
     >

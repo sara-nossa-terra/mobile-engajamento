@@ -13,7 +13,7 @@ import { Activity, AppColors } from '../../types';
 import api from '@services/Api';
 import { formatAmericanDatetimeToDate } from '@utils/formatAmericanDatetimeToDate';
 
-const ActivityComponent: React.FC = () => {
+const ActivityComponent: React.FC = ({}) => {
   const [activityList, setActivityList] = useState<Activity[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // carregando este componente
   const [refreshing, setRefreshing] = useState<boolean>(false); // refresh na listagem de atividades
@@ -26,7 +26,7 @@ const ActivityComponent: React.FC = () => {
 
   useEffect(() => {
     // atualiza as atividades quando a tela é focada de novo (quando o usuário volta da página de cadastro de atividades)
-    navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener('focus', () => {
       if (!loading) onRefresh();
     });
 
@@ -45,7 +45,7 @@ const ActivityComponent: React.FC = () => {
       });
 
     return () => {
-      navigation.removeListener('focus', () => {});
+      unsubscribe;
     };
   }, []);
 
