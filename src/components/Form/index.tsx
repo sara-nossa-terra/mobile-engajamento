@@ -1,18 +1,18 @@
 import React from 'react';
-import { View, ViewProps, StyleSheet } from 'react-native';
+import { View, ViewProps, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Text, Divider } from 'react-native-paper';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
-type FormProps = ViewProps & { title: string };
+type FormProps = ViewProps & { title: string; contentContainerStyle?: StyleProp<ViewStyle> };
 
-const Form: React.FC<FormProps> = ({ title, children, style, ...rest }) => {
+const Form: React.FC<FormProps> = ({ title, children, style, contentContainerStyle = {}, ...rest }) => {
   return (
     <View style={[style, styles.container]} {...rest}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{title.toUpperCase()}</Text>
       </View>
       <Divider />
-      <View style={styles.content}>{children}</View>
+      <View style={[styles.content, contentContainerStyle]}>{children}</View>
     </View>
   );
 };

@@ -14,6 +14,7 @@ const AppProvider: React.FC = ({ children }) => {
    *
    */
   const [loaded] = useFonts({
+    Montserrat_light_italic: require('../../assets/fonts/Montserrat-LightItalic.ttf'),
     Montserrat: require('../../assets/fonts/Montserrat-Regular.ttf'),
     Montserrat_medium: require('../../assets/fonts/Montserrat-Medium.ttf'),
     Montserrat_extra_bold: require('../../assets/fonts/Montserrat-ExtraBold.ttf'),

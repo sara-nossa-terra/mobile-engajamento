@@ -11,6 +11,7 @@ import { AppColors } from '../types';
 
 // pages
 import Dashboard from '@pages/Dashboard';
+import DashboardListPeopleHelped from '@pages/Dashboard/listPeopleHelped';
 import ActivityManage from '@pages/Activity';
 import PeopleHelpedManage from '@pages/PeopleHelped';
 import LeaderManage from '@pages/Leader';
@@ -32,6 +33,15 @@ const DashboardStackNavigator: React.FC = () => (
       options={{
         title: 'Arregimentação',
         headerLeft: () => <MenuHamburguer />,
+        headerRight: () => <MenuLogout />,
+      }}
+    />
+
+    <Stack.Screen
+      name="DashboardListPeopleHelpedStack"
+      component={DashboardListPeopleHelped}
+      options={{
+        title: 'Pessoas',
         headerRight: () => <MenuLogout />,
       }}
     />
