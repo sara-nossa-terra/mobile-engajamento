@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { Text, useTheme, Divider, Portal } from 'react-native-paper';
+import { Text, Divider } from 'react-native-paper';
 import { useAuth } from '@hooks/Auth';
 import { Feather as Icon } from '@expo/vector-icons';
 import AppLoading from '@components/AppLoading';
 import Card from '@components/Form';
 import SwipeablePanel from '@components/SwipeablePanel';
 import Toast from '@components/Toast';
+import DashboardActions from './DashboardActions';
+import { addWeeks, subWeeks } from 'date-fns';
 import { Activity, AppColors, PersonHelped } from '../../types';
 import api from '@services/Api';
 
 const Dashboard: React.FC = () => {
   const [date, setDate] = useState<Date>(new Date());
-  const [loading, setLoading] = useState<boolean>(true);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [openPanel, setOpenPanel] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true); // loading page
+  const [refreshing, setRefreshing] = useState<boolean>(false); // refresh atividades
+  const [openPanel, setOpenPanel] = useState<boolean>(false); // painel de pessoas ajudadas
   const [activitySelected, setActivitySelected] = useState<Activity>({} as Activity);
   const [activityList, setActivityList] = useState<Activity[]>([]);
   const [personHelpedList, setPersonHelpedList] = useState<PersonHelped[]>([]);
@@ -87,14 +89,21 @@ const Dashboard: React.FC = () => {
       });
   };
 
+  const advanceWeek = () => {
+    const nextWeek = addWeeks(date, 1);
+    setDate(nextWeek);
+  };
+
+  const backWeek = () => {
+    const lastWeek = subWeeks(date, 1);
+    setDate(lastWeek);
+  };
+
   if (loading) return <AppLoading />;
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Seja bem vindo(a), líder!</Text>
-        <Text style={styles.headerSubtitle}>Tente sempre manter as atividades atualizadas.</Text>
-      </View>
+      <DashboardActions date={date} advanceWeek={advanceWeek} backWeek={backWeek} />
 
       <Card
         title="ATIVIDADES"
@@ -143,18 +152,6 @@ export default Dashboard;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: AppColors.BLUE },
-
-  // header acima da listagem de atividades
-  header: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 20,
-    paddingVertical: 11,
-    borderRadius: 20,
-    marginTop: '2%',
-    justifyContent: 'space-between',
-  },
-  headerTitle: { fontFamily: 'Montserrat_medium', fontSize: 16, marginBottom: 5 },
-  headerSubtitle: { fontFamily: 'Montserrat_light_italic', fontSize: 12 },
 
   // atividades
   activity: { flexDirection: 'row', paddingHorizontal: 28, paddingVertical: 11 },
