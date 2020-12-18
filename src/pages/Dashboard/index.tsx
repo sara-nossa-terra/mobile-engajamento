@@ -5,9 +5,10 @@ import { useAuth } from '@hooks/Auth';
 import { Feather as Icon } from '@expo/vector-icons';
 import AppLoading from '@components/AppLoading';
 import Card from '@components/Form';
-import SwipeablePanel from '@components/SwipeablePanel';
 import Toast from '@components/Toast';
+import Button from '@components/Button';
 import DashboardActions from './DashboardActions';
+import DashboardPeopleHelpedModal from './DashboardPeopleHelpedModal';
 import { addWeeks, subWeeks } from 'date-fns';
 import { Activity, AppColors, PersonHelped } from '../../types';
 import api from '@services/Api';
@@ -99,6 +100,44 @@ const Dashboard: React.FC = () => {
     setDate(lastWeek);
   };
 
+  const onPressThumbsUp = (personId: number) => {
+    /**
+     *
+     * @todo
+     * Requisitar thumbs up
+     *
+     */
+
+    const newPersonHelpedList = personHelpedList.map(person => {
+      if (person.id === personId) {
+        person.thumbsup = true;
+      }
+
+      return person;
+    });
+
+    setPersonHelpedList(newPersonHelpedList);
+  };
+
+  const onPressThumbsDown = (personId: number) => {
+    /**
+     *
+     * @todo
+     * Requisistar thumbs down
+     *
+     */
+
+    const newPersonHelpedList = personHelpedList.map(person => {
+      if (person.id === personId) {
+        person.thumbsup = false;
+      }
+
+      return person;
+    });
+
+    setPersonHelpedList(newPersonHelpedList);
+  };
+
   if (loading) return <AppLoading />;
 
   return (
@@ -115,6 +154,12 @@ const Dashboard: React.FC = () => {
           keyExtractor={(item, index) => `${item.id}-${index}`}
           refreshing={refreshing}
           onRefresh={onRefresh}
+          ListEmptyComponent={() => (
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>Sem atividades para mostrar</Text>
+              <Button title="Atualizar" onPress={onRefresh} />
+            </View>
+          )}
           renderItem={({ item }) => (
             <View key={item.id} style={styles.activity}>
               <View style={styles.activityNameContainer}>
@@ -128,7 +173,10 @@ const Dashboard: React.FC = () => {
           ItemSeparatorComponent={Divider} // renderizado entre cada componente (cada atividade)
         />
       </Card>
-      <SwipeablePanel
+
+      <DashboardPeopleHelpedModal
+        onPressThumbsDown={onPressThumbsDown}
+        onPressThumbsUp={onPressThumbsUp}
         loading={loadingPersonHelpedList}
         personHelpedList={personHelpedList}
         activity={activitySelected}
@@ -140,7 +188,7 @@ const Dashboard: React.FC = () => {
         onDismiss={() => setErrorShowActivityToastVisible(false)}
         visible={errorShowActivityToastVisible}
         icon="x"
-        title="Não foi possível mostrar as atividades"
+        title="Não foi possível mostrar as atividades da semana"
         iconColor={AppColors.RED}
         backgroundColor={AppColors.RED}
       />
@@ -158,4 +206,8 @@ const styles = StyleSheet.create({
   activityNameContainer: { flex: 1, justifyContent: 'center' },
   activityName: { fontFamily: 'Montserrat_extra_bold', color: AppColors.BLUE, flexWrap: 'wrap' },
   activityIcon: { justifyContent: 'center' },
+
+  // Lista de atividades vazia
+  empty: { marginVertical: 20, alignItems: 'center', justifyContent: 'center' },
+  emptyText: { marginVertical: 20, fontFamily: 'Montserrat_medium', fontSize: 14 },
 });

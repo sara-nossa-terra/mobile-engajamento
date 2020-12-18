@@ -38,6 +38,7 @@ export interface PersonHelped {
   nu_ddd: number;
   nu_telefone: number;
   lider_id: Leader;
+  thumbsup?: boolean;
 }
 
 export interface LifeReview {}
