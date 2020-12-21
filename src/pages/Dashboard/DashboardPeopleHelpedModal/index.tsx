@@ -14,24 +14,39 @@ import { Activity, AppColors, PersonHelped } from '../../../types';
  */
 
 interface DashboardPeopleHelpedModalProps {
-  loading: boolean;
   personHelpedList: PersonHelped[];
   activity: Activity;
   active: boolean;
   onClose(): void | Promise<void>;
-  onPressThumbsUp(personId: number): void | Promise<void>;
-  onPressThumbsDown(personId: number): void | Promise<void>;
+  onPressThumbsUp(person: PersonHelped): void | Promise<void>;
+  onPressThumbsDown(person: PersonHelped): void | Promise<void>;
 }
 
 const DashboardPeopleHelpedModal: React.FC<DashboardPeopleHelpedModalProps> = ({
   active = false,
-  loading = false,
   onClose,
   activity,
   personHelpedList,
   onPressThumbsDown,
   onPressThumbsUp,
 }) => {
+  // console.log(personHelpedList[0]);
+  // console.log(activity);
+
+  // verifica se a pessoa fez a atividade
+  const checkIfPersonDoneActivity = (person: PersonHelped): boolean => {
+    let done: boolean = false;
+
+    if (person.atividade) {
+      person.atividade.forEach(atividade => {
+        if (atividade.id === activity.id && atividade.thumbsup) {
+          done = true;
+        }
+      });
+    }
+    return done;
+  };
+
   return (
     <Portal>
       <Modal
@@ -54,37 +69,31 @@ const DashboardPeopleHelpedModal: React.FC<DashboardPeopleHelpedModalProps> = ({
           </View>
           <Divider />
 
-          {loading ? (
-            <View style={styles.loading}>
-              <ActivityIndicator size="large" color={AppColors.BLUE} />
-            </View>
-          ) : (
-            <FlatList
-              data={personHelpedList}
-              ItemSeparatorComponent={Divider}
-              keyExtractor={item => `${item.id}`}
-              renderItem={({ item }) => (
+          <FlatList
+            data={personHelpedList}
+            ItemSeparatorComponent={Divider}
+            keyExtractor={item => `${item.id}`}
+            renderItem={({ item }) => {
+              const done = checkIfPersonDoneActivity(item);
+
+              return (
                 <View key={item.id} style={styles.person}>
                   <View style={styles.personNameContainer}>
                     <Text style={styles.personName}>{item.tx_nome}</Text>
                   </View>
                   <View style={styles.personActionsContainer}>
-                    <TouchableOpacity onPress={() => onPressThumbsUp(item.id)} style={styles.personAction}>
-                      <Icon name={item.thumbsup ? 'thumb-up' : 'thumb-up-outline'} size={25} color={AppColors.GREEN} />
+                    <TouchableOpacity onPress={() => onPressThumbsUp(item)} style={styles.personAction}>
+                      <Icon name={done ? 'thumb-up' : 'thumb-up-outline'} size={25} color={AppColors.GREEN} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => onPressThumbsDown(item.id)} style={styles.personAction}>
-                      <Icon
-                        name={item.thumbsup ? 'thumb-down-outline' : 'thumb-down'}
-                        size={25}
-                        color={AppColors.RED}
-                      />
+                    <TouchableOpacity onPress={() => onPressThumbsDown(item)} style={styles.personAction}>
+                      <Icon name={done ? 'thumb-down-outline' : 'thumb-down'} size={25} color={AppColors.RED} />
                     </TouchableOpacity>
                   </View>
                 </View>
-              )}
-            />
-          )}
+              );
+            }}
+          />
         </View>
       </Modal>
     </Portal>

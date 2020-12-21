@@ -12,6 +12,9 @@ import DashboardPeopleHelpedModal from './DashboardPeopleHelpedModal';
 import { addWeeks, subWeeks } from 'date-fns';
 import { Activity, AppColors, PersonHelped } from '../../types';
 import api from '@services/Api';
+import { endOfWeek, startOfWeek } from 'date-fns/esm';
+import { ptBR } from 'date-fns/locale';
+import { formatAmericanDatetimeToDate } from '@utils/formatAmericanDatetimeToDate';
 
 const Dashboard: React.FC = () => {
   const [date, setDate] = useState<Date>(new Date());
@@ -21,20 +24,31 @@ const Dashboard: React.FC = () => {
   const [activitySelected, setActivitySelected] = useState<Activity>({} as Activity);
   const [activityList, setActivityList] = useState<Activity[]>([]);
   const [personHelpedList, setPersonHelpedList] = useState<PersonHelped[]>([]);
-  const [loadingPersonHelpedList, setLoadingPersonHelpedList] = useState<boolean>(false);
   const [errorShowActivityToastVisible, setErrorShowActivityToastVisible] = useState<boolean>(false);
 
-  const auth = useAuth();
+  // começo e fim da semana
+  const dt_begin = startOfWeek(date, { locale: ptBR, weekStartsOn: 0 });
+  const dt_until = endOfWeek(date, { locale: ptBR, weekStartsOn: 0 });
 
   useEffect(() => {
     api
-      .get('/v1/activities')
+      .get('/v1/regimentation', { params: { dt_begin, dt_until } })
       .then(response => {
-        const data = response.data.data as Activity[];
-        setActivityList(data);
+        // os dados estão sendo retornados como um objeto de atividades e pessoas ajudadas, por isso a coonversão para array
+        const activityListData = response.data.data['activities'];
+        const personHelpedListData = response.data.data['helpedPerson'];
+        const counter = response.data.data['counter'];
+
+        // converte a lista de atividades e pessoas para array (estão retornando como objeto)
+        const activityListArray = Object.values(activityListData[0]) as Activity[];
+        const personHelpedListArray = Object.values(personHelpedListData) as PersonHelped[];
+
+        setActivityList(activityListArray);
+        setPersonHelpedList(personHelpedListArray);
       })
       .catch(() => {
         setActivityList([]);
+        setPersonHelpedList([]);
         setErrorShowActivityToastVisible(true);
       })
       .finally(() => {
@@ -57,14 +71,25 @@ const Dashboard: React.FC = () => {
 
   const onRefresh = () => {
     setRefreshing(true);
+
     api
-      .get('/v1/activities')
+      .get('/v1/regimentation', { params: { dt_begin, dt_until } })
       .then(response => {
-        const data = response.data.data as Activity[];
-        setActivityList(data);
+        // os dados estão sendo retornados como um objeto de atividades e pessoas ajudadas, por isso a coonversão para array
+        const activityListData = response.data.data['activities'];
+        const personHelpedListData = response.data.data['helpedPerson'];
+        // const counter = response.data.data['counter'];
+
+        // converte a lista de atividades e pessoas para array (estão retornando como objeto)
+        const activityListArray = Object.values(activityListData[0]) as Activity[];
+        const personHelpedListArray = Object.values(personHelpedListData) as PersonHelped[];
+
+        setActivityList(activityListArray);
+        setPersonHelpedList(personHelpedListArray);
       })
       .catch(() => {
         setActivityList([]);
+        setPersonHelpedList([]);
         setErrorShowActivityToastVisible(true);
       })
       .finally(() => {
@@ -72,77 +97,99 @@ const Dashboard: React.FC = () => {
       });
   };
 
+  // ao selecionar uma atividade, abre o modal
   const onSelectActivity = (activity: Activity) => {
     setActivitySelected(activity);
-    setLoadingPersonHelpedList(true);
     setOpenPanel(true);
-
-    api
-      .get(`/v1/helpedPersons/leader/${auth.user.id}`)
-      .then(response => {
-        const data = response.data.data as PersonHelped[];
-
-        setPersonHelpedList(data);
-        setLoadingPersonHelpedList(false);
-      })
-      .catch(() => {
-        setOpenPanel(false);
-      });
   };
 
   const advanceWeek = () => {
     const nextWeek = addWeeks(date, 1);
     setDate(nextWeek);
+    onRefresh();
   };
 
   const backWeek = () => {
     const lastWeek = subWeeks(date, 1);
     setDate(lastWeek);
+    onRefresh();
   };
 
-  const onPressThumbsUp = (personId: number) => {
-    /**
-     *
-     * @todo
-     * Requisitar thumbs up
-     *
-     */
-
-    const newPersonHelpedList = personHelpedList.map(person => {
-      if (person.id === personId) {
-        person.thumbsup = true;
+  const onPressThumbsUp = (person: PersonHelped) => {
+    let alreadyThumbsUp = false;
+    // seta o valor de thumbsup como true
+    const newPersonHelpedList = personHelpedList.map(p => {
+      if (p.id === person.id && p.atividade) {
+        p.atividade.map(a => {
+          if (a.id === activitySelected.id) {
+            if (a.thumbsup) alreadyThumbsUp = true;
+            else a.thumbsup = true;
+          }
+        });
       }
 
-      return person;
+      return p;
     });
 
+    // se o botão já esta setado como thumbsup e mesmo assim o usuário clicar
+    if (alreadyThumbsUp) return;
+
     setPersonHelpedList(newPersonHelpedList);
+
+    api
+      .post('/v1/regimentation/review', {
+        atividade_id: activitySelected.id,
+        pessoa_id: person.id,
+        dt_periodo: formatAmericanDatetimeToDate(activitySelected.dt_dia),
+      })
+      .then(() => {})
+      .catch(err => {
+        // caso tenha erro, ele seta novamente o valor de thumbsup para false
+        const newPersonHelpedList = personHelpedList.map(p => {
+          if (p.id === person.id && p.atividade) {
+            p.atividade.map(a => {
+              if (a.id === activitySelected.id) {
+                a.thumbsup = false;
+              }
+            });
+          }
+
+          return p;
+        });
+
+        setPersonHelpedList(newPersonHelpedList);
+      });
   };
 
-  const onPressThumbsDown = (personId: number) => {
-    /**
-     *
-     * @todo
-     * Requisistar thumbs down
-     *
-     */
-
-    const newPersonHelpedList = personHelpedList.map(person => {
-      if (person.id === personId) {
-        person.thumbsup = false;
+  const onPressThumbsDown = (person: PersonHelped) => {
+    let alreadyThumbsdown = false;
+    // seta o valor de thumbsdown como false
+    const newPersonHelpedList = personHelpedList.map(p => {
+      if (p.id === person.id && p.atividade) {
+        p.atividade.map(a => {
+          if (a.id === activitySelected.id) {
+            if (!a.thumbsup) alreadyThumbsdown = true;
+            else a.thumbsup = false;
+          }
+        });
       }
 
-      return person;
+      return p;
     });
 
+    // se a a pessoa já esta setada como thumbsdown e mesmo assim o usuário clicar
+    if (alreadyThumbsdown) return;
+
     setPersonHelpedList(newPersonHelpedList);
+
+    // fazer a request de exclusão do thumbsdown
   };
 
   if (loading) return <AppLoading />;
 
   return (
     <View style={styles.container}>
-      <DashboardActions date={date} advanceWeek={advanceWeek} backWeek={backWeek} />
+      <DashboardActions start={dt_begin} end={dt_until} advanceWeek={advanceWeek} backWeek={backWeek} />
 
       <Card
         title="ATIVIDADES"
@@ -177,7 +224,6 @@ const Dashboard: React.FC = () => {
       <DashboardPeopleHelpedModal
         onPressThumbsDown={onPressThumbsDown}
         onPressThumbsUp={onPressThumbsUp}
-        loading={loadingPersonHelpedList}
         personHelpedList={personHelpedList}
         activity={activitySelected}
         active={openPanel}

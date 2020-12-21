@@ -15,15 +15,13 @@ import { AppColors } from '../../../types';
 interface DashboardActionsProps {
   advanceWeek(): void;
   backWeek(): void;
-  date: Date;
+  start: Date;
+  end: Date;
 }
 
-const DashboardActions: React.FC<DashboardActionsProps> = ({ advanceWeek, backWeek, date }) => {
-  const firstDayOfWeek = startOfWeek(date, { locale: ptBR });
-  const lastDayOfWeek = endOfWeek(date, { locale: ptBR });
-
-  const firstDayOfWeekFormated = format(firstDayOfWeek, 'dd/MM', { locale: ptBR });
-  const lastDayOfWeeksFormated = format(lastDayOfWeek, 'dd/MM', { locale: ptBR });
+const DashboardActions: React.FC<DashboardActionsProps> = ({ advanceWeek, backWeek, start, end }) => {
+  const firstDayOfWeekFormated = format(start, 'dd/MM', { locale: ptBR });
+  const lastDayOfWeeksFormated = format(end, 'dd/MM', { locale: ptBR });
 
   return (
     <View style={styles.header}>
