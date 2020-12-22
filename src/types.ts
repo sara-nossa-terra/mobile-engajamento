@@ -42,6 +42,5 @@ export interface PersonHelped {
   nu_ddd: number;
   nu_telefone: number;
   lider_id: Leader;
-  thumbsup?: boolean;
-  atividade?: { dt_dia: Date; id: number; thumbsup: boolean; tx_nome: string }[];
+  atividade?: { dt_dia: Date; id: number; thumbsup: boolean; tx_nome: string; reviewId: number }[];
 }

@@ -12,7 +12,7 @@ import DashboardPeopleHelpedModal from './DashboardPeopleHelpedModal';
 import { addWeeks, subWeeks } from 'date-fns';
 import { Activity, AppColors, PersonHelped } from '../../types';
 import api from '@services/Api';
-import { endOfWeek, startOfWeek } from 'date-fns/esm';
+import { endOfWeek, startOfWeek, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatAmericanDatetimeToDate } from '@utils/formatAmericanDatetimeToDate';
 
@@ -32,12 +32,13 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     api
-      .get('/v1/regimentation', { params: { dt_begin, dt_until } })
+      .get('/v1/regimentation', {
+        params: { dt_begin: format(dt_begin, 'yyyy-MM-dd'), dt_until: format(dt_until, 'yyyy-MM-dd') },
+      })
       .then(response => {
         // os dados estão sendo retornados como um objeto de atividades e pessoas ajudadas, por isso a coonversão para array
         const activityListData = response.data.data['activities'];
         const personHelpedListData = response.data.data['helpedPerson'];
-        const counter = response.data.data['counter'];
 
         // converte a lista de atividades e pessoas para array (estão retornando como objeto)
         const activityListArray = Object.values(activityListData[0]) as Activity[];
@@ -56,6 +57,11 @@ const Dashboard: React.FC = () => {
       });
   }, []);
 
+  // atualiza a lista de atividades quando a data mudar
+  useEffect(() => {
+    onRefresh();
+  }, [date]);
+
   // mostra o toast de erro por 5 segs
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -73,12 +79,13 @@ const Dashboard: React.FC = () => {
     setRefreshing(true);
 
     api
-      .get('/v1/regimentation', { params: { dt_begin, dt_until } })
+      .get('/v1/regimentation', {
+        params: { dt_begin: format(dt_begin, 'yyyy-MM-dd'), dt_until: format(dt_until, 'yyyy-MM-dd') },
+      })
       .then(response => {
         // os dados estão sendo retornados como um objeto de atividades e pessoas ajudadas, por isso a coonversão para array
         const activityListData = response.data.data['activities'];
         const personHelpedListData = response.data.data['helpedPerson'];
-        // const counter = response.data.data['counter'];
 
         // converte a lista de atividades e pessoas para array (estão retornando como objeto)
         const activityListArray = Object.values(activityListData[0]) as Activity[];
@@ -106,50 +113,26 @@ const Dashboard: React.FC = () => {
   const advanceWeek = () => {
     const nextWeek = addWeeks(date, 1);
     setDate(nextWeek);
-    onRefresh();
   };
 
   const backWeek = () => {
     const lastWeek = subWeeks(date, 1);
     setDate(lastWeek);
-    onRefresh();
   };
 
   const onPressThumbsUp = (person: PersonHelped) => {
-    let alreadyThumbsUp = false;
-    // seta o valor de thumbsup como true
-    const newPersonHelpedList = personHelpedList.map(p => {
-      if (p.id === person.id && p.atividade) {
-        p.atividade.map(a => {
-          if (a.id === activitySelected.id) {
-            if (a.thumbsup) alreadyThumbsUp = true;
-            else a.thumbsup = true;
-          }
-        });
-      }
-
-      return p;
-    });
-
-    // se o botão já esta setado como thumbsup e mesmo assim o usuário clicar
-    if (alreadyThumbsUp) return;
-
-    setPersonHelpedList(newPersonHelpedList);
-
     api
       .post('/v1/regimentation/review', {
         atividade_id: activitySelected.id,
         pessoa_id: person.id,
-        dt_periodo: formatAmericanDatetimeToDate(activitySelected.dt_dia),
+        dt_periodo: date,
       })
-      .then(() => {})
-      .catch(err => {
-        // caso tenha erro, ele seta novamente o valor de thumbsup para false
+      .then(() => {
         const newPersonHelpedList = personHelpedList.map(p => {
           if (p.id === person.id && p.atividade) {
             p.atividade.map(a => {
               if (a.id === activitySelected.id) {
-                a.thumbsup = false;
+                a.thumbsup = true;
               }
             });
           }
@@ -158,31 +141,38 @@ const Dashboard: React.FC = () => {
         });
 
         setPersonHelpedList(newPersonHelpedList);
-      });
+      })
+      .catch(() => {});
   };
 
   const onPressThumbsDown = (person: PersonHelped) => {
-    let alreadyThumbsdown = false;
-    // seta o valor de thumbsdown como false
+    let reviewID = 0;
+
     const newPersonHelpedList = personHelpedList.map(p => {
-      if (p.id === person.id && p.atividade) {
-        p.atividade.map(a => {
-          if (a.id === activitySelected.id) {
-            if (!a.thumbsup) alreadyThumbsdown = true;
-            else a.thumbsup = false;
+      if (p.id === person.id) {
+        person.atividade?.map(activity => {
+          if (activity.id === activitySelected.id) {
+            activity.thumbsup = false;
+            reviewID = activity.reviewId;
           }
+
+          return activity;
         });
       }
-
       return p;
     });
 
-    // se a a pessoa já esta setada como thumbsdown e mesmo assim o usuário clicar
-    if (alreadyThumbsdown) return;
+    if (reviewID === 0) {
+      setPersonHelpedList(newPersonHelpedList);
+      return;
+    }
 
-    setPersonHelpedList(newPersonHelpedList);
-
-    // fazer a request de exclusão do thumbsdown
+    api
+      .delete(`/v1/regimentation/${reviewID}`)
+      .then(() => {
+        setPersonHelpedList(newPersonHelpedList);
+      })
+      .catch(() => {});
   };
 
   if (loading) return <AppLoading />;
