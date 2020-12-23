@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Image } from 'react-native';
 import { Text, Divider } from 'react-native-paper';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
@@ -21,6 +21,8 @@ import EditActivity from '@pages/Activity/editActivity';
 import EditPersonHelped from '@pages/PeopleHelped/editPersonHelped';
 import EditLeader from '@pages/Leader/editLeader';
 
+import appIcon from '../assets/icon.png';
+
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 
@@ -30,7 +32,7 @@ const DashboardStackNavigator: React.FC = () => (
       name="DashboardStack"
       component={Dashboard}
       options={{
-        title: '+1',
+        headerTitle: () => <Image source={appIcon} style={{ width: 50, height: 50 }} />,
         headerLeft: () => <MenuHamburguer />,
         headerRight: () => <MenuLogout />,
       }}
