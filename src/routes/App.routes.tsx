@@ -30,7 +30,7 @@ const DashboardStackNavigator: React.FC = () => (
       name="DashboardStack"
       component={Dashboard}
       options={{
-        title: 'Arregimentação',
+        title: '+1',
         headerLeft: () => <MenuHamburguer />,
         headerRight: () => <MenuLogout />,
       }}
