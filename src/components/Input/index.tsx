@@ -9,7 +9,6 @@ const Input: React.FC<TextInputProps> = ({ error = false, right: RightComponet, 
   return (
     <TextInput
       mode="outlined"
-      placeholderTextColor="rgb(217, 217, 217)"
       right={error ? <TextInput.Icon name="information" size={30} color={AppColors.RED} /> : RightComponet}
       error={error}
       style={[styles.input, style]}
@@ -24,7 +23,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     fontSize: 12,
     fontFamily: 'Montserrat_medium',
-    borderColor: 'rgba(0, 0, 0, 0.25)',
   },
 });
 

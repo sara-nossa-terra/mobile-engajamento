@@ -6,7 +6,6 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "eject": "expo eject",
-    "server": "json-server --watch db.json",
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix"
   },
   "dependencies": {
@@ -28,21 +27,25 @@
     "react-dom": "16.13.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-39.0.4.tar.gz",
     "react-native-bootstrap-styles": "^0.4.5-0-l",
+    "react-native-dropdown-picker": "^3.7.1",
     "react-native-gesture-handler": "~1.7.0",
+    "react-native-masked-text": "^1.13.0",
+    "react-native-modal": "^11.5.6",
     "react-native-paper": "^4.3.0",
     "react-native-reanimated": "~1.13.0",
     "react-native-responsive-screen": "^1.4.1",
     "react-native-safe-area-context": "3.1.4",
     "react-native-screens": "~2.10.1",
     "react-native-web": "~0.13.12",
-    "styled-components": "^5.2.0",
     "yup": "^0.29.3"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",
+    "@types/faker": "^5.1.4",
     "@types/react": "~16.9.35",
     "@types/react-dom": "~16.9.8",
     "@types/react-native": "~0.63.2",
+    "@types/rn-swipeable-panel": "^1.2.1",
     "@types/styled-components": "^5.1.4",
     "@types/yup": "^0.29.9",
     "@typescript-eslint/eslint-plugin": "^4.6.0",
@@ -52,7 +55,7 @@
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-react": "7.20.0",
-    "json-server": "^0.16.2",
+    "faker": "^5.1.0",
     "prettier": "^2.1.2",
     "typescript": "~3.9.5"
   },

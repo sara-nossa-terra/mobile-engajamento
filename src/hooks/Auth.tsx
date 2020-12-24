@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
-import { User } from '../types';
 import api from '@services/Api';
+import { Leader } from '../types';
 
 interface AuthState {
   token: string;
-  user: User;
+  user: Leader;
 }
 
 interface LoginCredentials {
@@ -14,7 +14,8 @@ interface LoginCredentials {
 }
 
 interface AuthContextProps {
-  user: User;
+  token: string;
+  user: Leader;
   loading: boolean;
   login(credentials: LoginCredentials): Promise<void>;
   logOut(): Promise<void>;
@@ -33,6 +34,19 @@ const AuthProvider: React.FC = ({ children }) => {
       if (token[1] && user[1]) {
         api.defaults.headers.authorization = `Bearer ${token[1]}`;
         setData({ token: token[1], user: JSON.parse(user[1]) });
+
+        api.interceptors.response.use(
+          response => {
+            return response;
+          },
+          error => {
+            if ([401, 422].includes(error.response.status)) {
+              logOut();
+            }
+
+            return error;
+          },
+        );
       }
 
       setLoading(false);
@@ -42,36 +56,38 @@ const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   const login = useCallback(async ({ email, password }: LoginCredentials) => {
-    // Descomentar e setar a URL quando o back estiver pronto para a integração
-    // const response = await api.post('/sessions', { email, password })
+    const response = await api.post('/login', { email: email.toLowerCase(), password });
 
-    const userFakeData: User = {
-      birth: new Date(1999, 9, 9),
-      email: email,
-      id: 1,
-      name: 'admin',
-    };
+    const token = response.data.access_token as string;
 
-    const token = 'token_asdoiasdaosd_asdoaidaoidsas'; // fake
-
-    // armazena o usuário e o token no dispositivo
-    await AsyncStorage.multiSet([
-      ['@Engajamento:token', token],
-      ['@Engajamento:user', JSON.stringify(userFakeData)],
-    ]);
-
+    // armazena o token na request
     api.defaults.headers.authorization = `Bearer ${token}`;
 
-    setData({ token, user: userFakeData });
+    const userInfoResponse = await api.post('/v1/auth/me');
+    const user = userInfoResponse.data.data as Leader;
+
+    // armazena o token e o usuário
+    await AsyncStorage.multiSet([
+      ['@Engajamento:token', token],
+      ['@Engajamento:user', JSON.stringify(user)],
+    ]);
+
+    setData({ token, user });
   }, []);
 
   const logOut = useCallback(async () => {
-    await AsyncStorage.multiRemove(['@Engajamento:user', '@Engajamento:token']);
-
-    setData({} as AuthState);
+    AsyncStorage.multiRemove(['@Engajamento:token', '@Engajamento:user'])
+      .then(() => {
+        setData({} as AuthState);
+      })
+      .catch(() => {});
   }, []);
 
-  return <AuthContext.Provider value={{ login, user: data.user, loading, logOut }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ login, loading, logOut, token: data.token, user: data.user }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 // React Hook que retorna o acesso a dados e funções de autenticação

@@ -1,13 +1,12 @@
-# mobile-engajamento
-
-@todo melhorar doc.
-
-Aplicação mobile do sistema Engajamento.
+Aplicação mobile do sistema Engajamento. Um sistema que controla as atividades e líderes da Igreja Sara Nossa Terra.
 
 # ENGAJAMENTO
 
 [![GitHub Issues Abertas](https://img.shields.io/github/issues/sara-nossa-terra/mobile-engajamento)]()
 [![MIT License](https://img.shields.io/github/license/sara-nossa-terra/mobile-engajamento)]()
+[![Version](https://img.shields.io/badge/version-1.0.0-green.svg?cacheSeconds=2592000)]()
+[![Language](https://img.shields.io/badge/Language-TypeScript-blue.svg?cacheSeconds=2592000)]()
+[![Style Prettier](https://img.shields.io/badge/Stylized-prettier-pink.svg?cacheSeconds=2592000)]()
 
 Bem vindo/a à documentação do aplicativo mobile do sistema ENGAJAMENTO!
 
@@ -17,11 +16,23 @@ Para executar o aplicativo do Engajamento, é necessário ter um emulador no seu
 
 Também é necessário ter o [Node.js](https://nodejs.org/) em sua máquina.
 
-Clone o projeto em sua máquina e instale as dependências do projeto com o `npm` ou `yarn`:
+Clone o projeto em sua máquina e entre no diretório do projeto:
 
 ```bash
     $ git clone https://github.com/sara-nossa-terra/mobile-engajamento.git
-    $ cd mobile-engajamento && yarn install
+    $ cd mobile-engajamento
+```
+
+Você pode usar o `yarn` para instalar as dependências dentro da pasta mobile-engajamento:
+
+```bash
+    $ yarn install
+```
+
+Ou você pode instalar com o `npm`:
+
+```bash
+    $ npm install
 ```
 
 Feito isso, execute o comando abaixo para rodar projeto em sua máquina:
@@ -38,35 +49,42 @@ Após alguns instantes a aplicação estará disponível em:
 
 Caso esteja usando um smartphone, é necessário possui o aplicativo do EXPO instalado nele e escanear o QRCode que aparecer na página aberta em `localhost:19002`.
 
-### consumir a Api fake do projeto
+# Conectado a API do Engajamento via Android USB
 
-Para consumir a api Fake do projeto em seu dispositivo, é necessário configurar o redirecionamento da porta na sua máquina para o app do seu smartphone digitando o comando abaixo:
+- Para conectar o aplicativo à [API do Sistema Engajamento](https://github.com/sara-nossa-terra/api-engajamento), você precisa estar com seu dispositivo conectado via USB ao seu computador.
 
-```bash
-    $ adb -s <device name> reverse tcp:3000 tcp:3000
-```
+- Também é necessário ter o [Modo desenvolvedor ativado no seu dispositivo](https://tecnoblog.net/277750/como-ativar-o-modo-desenvolvedor-no-android/) para prossseguir.
 
-OBS: o nome do dispositivo pode ser pego utilizando o comando `adb devices` (necessário ter o [adb instalando na sua máquina](https://developer.android.com/studio/command-line/adb?hl=pt-br))
+- Também é necessário ter o [ADB (Android Device Bridge) instalado no seu computador](https://developer.android.com/studio/releases/platform-tools)
 
-Feito isso, execute o comando abaixo em outra aba no terminal e reinicie sua aplicação:
+Agora, execute o comando abaixo e pega o ID do seu dispositivo
 
 ```bash
-    $ yarn server
+    $ adb devices
 ```
 
-Para consumir a API via wifi, basta mudar o caminho do servidor da api em `src/services/Api.ts`, colocando o IP e a porta que se encontra o servidor fake.
+Copie o ID do seu dispositivo conectado ao computador e, em seguida, execute o comando:
+
+```bash
+    $ adb -s <id_dispositivo> reverse tcp:8080 tcp:8080
+```
+
+Lembrando que `tcp:PORTA` é necessário especificiar a porta em que a API esta rodando, certifique-se de ser a mesma que você executar este comando.
+
+Feito isso, a aplicação conectará automaticamente à API do Engajamento.
 
 ## :rocket: Tecnologias
 
 O aplicativo mobile do sistema Engajamento foi construida com React Native. Abaixo estão listadas as tecnologias utilizadas no aplicativo.
 
 - [React Native](https://reactnative.dev/)
-- [Expo](https://docs.expo.io/)
-- [React Navigation 5.1](https://reactnavigation.org/)
+- [Expo v0.39](https://docs.expo.io/)
+- [React Navigation v5.1](https://reactnavigation.org/)
 - [NodeJS >=12](https://nodejs.org/)
-- [React Native Paper 4.3.0](https://callstack.github.io/react-native-paper/)
-- [Formik](https://formik.org/docs/overview)
+- [React Native Paper v4.3.0](https://callstack.github.io/react-native-paper/)
+- [Formik v2.2](https://formik.org/docs/overview)
 - [Yup](https://github.com/jquense/yup)
+- [React Native Modal v11](https://github.com/react-native-modal/react-native-modal)
 
 ## :busts_in_silhouette: Autores
 

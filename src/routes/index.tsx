@@ -12,11 +12,11 @@ import AuthNavigator from '@routes/Auth.routes';
 
 //Arquivo dedicado as configurações de navegação do aplicativo
 const Navigation: React.FC = () => {
-    const { loading, user } = useAuth();
+  const { loading, token, user } = useAuth();
 
-    if (loading) return <AppLoading />;
+  if (loading) return <AppLoading />;
 
-    return user ? <AppNavigator /> : <AuthNavigator />;
+  return token && user ? <AppNavigator /> : <AuthNavigator />;
 };
 
 export default Navigation;

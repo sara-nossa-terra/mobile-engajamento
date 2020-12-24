@@ -1,5 +1,13 @@
 import React, { useState, useCallback } from 'react';
-import { SafeAreaView, View, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import {
+  SafeAreaView,
+  View,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Keyboard,
+  ActivityIndicator,
+} from 'react-native';
 import { Switch, Text, useTheme } from 'react-native-paper';
 import { Button } from 'native-base';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
@@ -20,8 +28,11 @@ interface FormSubmitData {
 }
 
 const Login: React.FC = () => {
+  const [loadingRequest, setLoadingRequest] = useState<boolean>(false);
   const [remember, setRemember] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
+
+  const [MessageError, setMessageError] = useState<string>('');
 
   const { login } = useAuth();
   const theme = useTheme();
@@ -29,8 +40,16 @@ const Login: React.FC = () => {
   const handleLogin = useCallback(
     async ({ email, password }: FormSubmitData) => {
       try {
+        setLoadingRequest(true);
+        Keyboard.dismiss();
         await login({ email, password });
       } catch (err) {
+        if (err.status == 401 && err.data.error) {
+          setMessageError('Usuário e/ou senha incorretos!\n Tente novamente.');
+        } else {
+          setMessageError('Não foi possível fazer login! Favor tente novamente mais tarde.');
+        }
+        setLoadingRequest(false);
         setError(true);
       }
     },
@@ -43,24 +62,18 @@ const Login: React.FC = () => {
         onSubmit={handleLogin}
         validationSchema={loginValidationSchema}
         validateOnBlur={true}
-        initialValues={{
-          email: '',
-          password: '',
-        }}
+        initialValues={{ email: '', password: '' }}
       >
-        {({ values, errors, handleBlur, handleSubmit, handleChange }) => (
+        {({ values, errors, touched, setFieldTouched, handleSubmit, handleChange }) => (
           <React.Fragment>
-            {false && (
+            {error && (
               <View style={styles.errorContainer}>
                 <View style={styles.error} />
                 <View style={styles.errorTextContainer}>
                   <View style={styles.errorIconContainer}>
                     <Icon name="information" size={30} color={AppColors.RED} />
                   </View>
-                  <Text style={styles.errorText}>
-                    Login / Senha incorretos{'\n'}
-                    Tente novamente.
-                  </Text>
+                  <Text style={styles.errorText}>{MessageError}</Text>
                 </View>
               </View>
             )}
@@ -73,10 +86,10 @@ const Login: React.FC = () => {
                 <Text style={styles.subtitle}>Inicie uma sessão</Text>
               </View>
               <Input
-                error={!!errors.email}
+                error={errors.email && touched.email ? true : false}
                 value={values.email}
                 onChangeText={handleChange('email')}
-                onBlur={handleBlur('email')}
+                onBlur={() => setFieldTouched('email', true)}
                 autoCompleteType="email"
                 keyboardType="email-address"
                 placeholder="E-mail"
@@ -85,10 +98,10 @@ const Login: React.FC = () => {
                 theme={theme}
               />
               <Input
-                error={!!errors.password}
+                error={errors.password && touched.password ? true : false}
                 value={values.password}
                 onChangeText={handleChange('password')}
-                onBlur={handleBlur('password')}
+                onBlur={() => setFieldTouched('password', true)}
                 secureTextEntry={true}
                 placeholder="Senha"
                 placeholderTextColor="rgb(39, 36, 46)"
@@ -106,8 +119,12 @@ const Login: React.FC = () => {
                 <Text style={styles.text}>Lembrar-me</Text>
               </View>
 
-              <Button large rounded onPress={handleSubmit} style={styles.button}>
-                <Text style={styles.buttonText}>ENTRAR</Text>
+              <Button disabled={loadingRequest} rounded onPress={handleSubmit} style={styles.button}>
+                {loadingRequest ? (
+                  <ActivityIndicator style={{ width: '55%' }} size="large" color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>ENTRAR</Text>
+                )}
               </Button>
             </KeyboardAvoidingView>
           </React.Fragment>
