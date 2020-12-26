@@ -88,7 +88,6 @@ const EditPersonHelped: React.FC = () => {
     if (leader.value === 0) return;
 
     const { dddPhoneNumber, phoneNumber } = separeDDDFromPhoneNumber(nu_telefone);
-
     api
       .put(`/v1/helpedPersons/${personId}`, {
         tx_nome,
@@ -97,6 +96,7 @@ const EditPersonHelped: React.FC = () => {
         phoneNumber,
         nu_telefone: phoneNumber,
         nu_ddd: dddPhoneNumber,
+        id: personId,
       })
       .then(() => {
         setSuccessToastVisible(true);
