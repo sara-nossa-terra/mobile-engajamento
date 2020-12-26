@@ -66,7 +66,7 @@ Agora, execute o comando abaixo e pega o ID do seu dispositivo
 Copie o ID do seu dispositivo conectado ao computador e, em seguida, execute o comando:
 
 ```bash
-    $ adb -s <id_dispositivo> reverse tcp:8080 tcp:8080
+    $ adb -s <id_dispositivo> reverse tcp:8082 tcp:8082
 ```
 
 Lembrando que `tcp:PORTA` é necessário especificiar a porta em que a API esta rodando, certifique-se de ser a mesma que você executar este comando.
