@@ -20,11 +20,6 @@ const LeaderComponent: React.FC = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    // atualiza a lista de líderes quando a página é focada (quando o usuário volta da página de cadastro de líderes)
-    const unsubscribe = navigation.addListener('focus', () => {
-      if (!loading) onRefresh();
-    });
-
     api
       .get('/v1/leaders')
       .then(response => {
@@ -38,11 +33,16 @@ const LeaderComponent: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-
-    return () => {
-      unsubscribe;
-    };
   }, []);
+
+  // atualiza a lista de líderes quando a página é focada (quando o usuário volta da página de cadastro de líderes)
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (!loading) onRefresh();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   // mostra toast de erro por 5 segs
   useEffect(() => {

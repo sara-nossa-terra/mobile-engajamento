@@ -23,11 +23,6 @@ const PeopleHelped: React.FC = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    // atualiza a lista de pessoas quando a página é focada (quando o usuário retorna da tela de cadastro de pessoas)
-    const unsubscribe = navigation.addListener('focus', () => {
-      if (!loading) onRefresh();
-    });
-
     const url = auth.user.id === 1 ? '/v1/helpedPersons/' : `/v1/helpedPersons/leader/${auth.user.id}`;
     api
       .get(url)
@@ -42,11 +37,16 @@ const PeopleHelped: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-
-    return () => {
-      unsubscribe;
-    };
   }, []);
+
+  // atualiza a lista de pessoas quando a página é focada (quando o usuário retorna da tela de cadastro de pessoas)
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (!loading) onRefresh();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   // mostra toast de exclusão de pessoas ajudadas  por 5 segs
   useEffect(() => {

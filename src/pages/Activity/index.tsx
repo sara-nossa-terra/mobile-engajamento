@@ -25,11 +25,6 @@ const ActivityComponent: React.FC = ({}) => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    // atualiza as atividades quando a tela é focada de novo (quando o usuário volta da página de cadastro de atividades)
-    const unsubscribe = navigation.addListener('focus', () => {
-      if (!loading) onRefresh();
-    });
-
     api
       .get('/v1/activities')
       .then(response => {
@@ -43,11 +38,15 @@ const ActivityComponent: React.FC = ({}) => {
       .finally(() => {
         setLoading(false);
       });
-
-    return () => {
-      unsubscribe;
-    };
   }, []);
+
+  // atualiza as atividades quando a tela é focada de novo (quando o usuário volta da página de cadastro de atividades)
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (!loading) onRefresh();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   // mostra o toast de exclusão de atividades por 5 segs
   useEffect(() => {
