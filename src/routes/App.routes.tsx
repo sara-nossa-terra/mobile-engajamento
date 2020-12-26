@@ -21,7 +21,7 @@ import EditActivity from '@pages/Activity/editActivity';
 import EditPersonHelped from '@pages/PeopleHelped/editPersonHelped';
 import EditLeader from '@pages/Leader/editLeader';
 
-import appIcon from '../assets/icon.png';
+import appIcon from '../assets/icon_2.png';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -32,7 +32,7 @@ const DashboardStackNavigator: React.FC = () => (
       name="DashboardStack"
       component={Dashboard}
       options={{
-        headerTitle: () => <Image source={appIcon} style={{ width: 50, height: 50 }} />,
+        headerTitle: () => <Image source={appIcon} style={{ width: 30, height: 25 }} />,
         headerLeft: () => <MenuHamburguer />,
         headerRight: () => <MenuLogout />,
       }}
