@@ -34,7 +34,11 @@ const EditActivity: React.FC = () => {
     api
       .get(`/v1/activities/${activityId}`)
       .then(response => {
-        setActivity({ ...response.data.data, dt_dia: formatAmericanDatetimeToDate(response.data.data.dt_dia) });
+        setActivity({
+          id: response.data.data.id,
+          tx_nome: response.data.data.tx_nome,
+          dt_dia: formatAmericanDatetimeToDate(response.data.data.dt_dia),
+        });
       })
       .catch(() => {
         setErrorShowActivityToastVisible(true);
@@ -49,7 +53,6 @@ const EditActivity: React.FC = () => {
     const timer = setTimeout(() => {
       if (errorToastVisible) {
         setErrorToastVisible(false);
-        navigation.goBack();
       }
     }, 5000);
 
@@ -92,14 +95,15 @@ const EditActivity: React.FC = () => {
 
   const onDismissErrorToast = async () => {
     setErrorToastVisible(false);
-    navigation.goBack();
   };
 
   // atualiza as atividades
   const onSubmit = async ({ tx_nome, dt_dia }: SubmitFormData) => {
+    const dt_dia_formated = formatDateToAmericanDatetime(dt_dia);
+
     api
-      .put(`/v1/activities/${activityId}`, { tx_nome, dt_dia: formatDateToAmericanDatetime(dt_dia) })
-      .then(() => {
+      .put(`/v1/activities/${activityId}`, { tx_nome, dt_dia: dt_dia_formated })
+      .then(response => {
         setSuccessToastVisible(true);
       })
       .catch(err => {

@@ -40,7 +40,7 @@ const CreateActivity: React.FC = () => {
     const timer = setTimeout(() => {
       if (successToastVisible) {
         setSuccessToastVisible(false);
-        navigation.goBack();
+        navigation.navigate('ActivityManageStack');
       }
     }, 5000);
 
@@ -51,17 +51,19 @@ const CreateActivity: React.FC = () => {
 
   const onDismissSuccessToast = () => {
     setSuccessToastVisible(false);
-    navigation.goBack();
+    navigation.navigate('ActivityManageStack');
   };
 
   // cadastrar atividade
   const onSubmit = async ({ tx_nome, dt_dia }: SubmitFormData) => {
+    const dt_dia_formated = formatDateToAmericanDatetime(dt_dia);
+
     api
-      .post('/v1/activities', { tx_nome, dt_dia: formatDateToAmericanDatetime(dt_dia) })
+      .post('/v1/activities', { tx_nome, dt_dia: dt_dia_formated })
       .then(() => {
         setSuccessToastVisible(true);
       })
-      .catch(err => {
+      .catch(() => {
         setErrorToastVisible(true);
       });
   };

@@ -16,5 +16,5 @@ export const formatAmericanDatetimeToDate = (americanDateTime: string) => {
  *
  */
 export const formatDateToAmericanDatetime = (date: Date) => {
-  return format(new Date(date), 'y-MM-dd H:m', { locale: ptBR });
+  return format(new Date(date), 'y-MM-dd HH:mm', { locale: ptBR });
 };

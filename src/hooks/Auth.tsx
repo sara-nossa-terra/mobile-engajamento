@@ -40,7 +40,7 @@ const AuthProvider: React.FC = ({ children }) => {
             return response;
           },
           error => {
-            if ([401, 422].includes(error.response.status)) {
+            if (error.response.status == 401) {
               logOut();
             }
 
