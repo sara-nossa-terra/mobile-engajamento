@@ -19,6 +19,7 @@ interface AuthContextProps {
   loading: boolean;
   login(credentials: LoginCredentials): Promise<void>;
   logOut(): Promise<void>;
+  isAdmin(): boolean;
 }
 
 const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
@@ -83,8 +84,18 @@ const AuthProvider: React.FC = ({ children }) => {
       .catch(() => {});
   }, []);
 
+  const isAdmin = () => {
+    let admin = false;
+
+    if (data.user.id == 1) {
+      admin = true;
+    }
+
+    return admin;
+  };
+
   return (
-    <AuthContext.Provider value={{ login, loading, logOut, token: data.token, user: data.user }}>
+    <AuthContext.Provider value={{ isAdmin, login, loading, logOut, token: data.token, user: data.user }}>
       {children}
     </AuthContext.Provider>
   );
