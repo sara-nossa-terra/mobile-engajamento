@@ -13,6 +13,13 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { AppColors, Leader, PersonHelped } from '../../../types';
 import api from '@services/Api';
+import { useAuth } from '@hooks/Auth';
+
+const formSchemaAdmin = Yup.object().shape({
+  tx_nome: Yup.string().required(),
+  nu_telefone: Yup.string().min(14).required(),
+  dt_nascimento: Yup.date().required(),
+});
 
 const formSchema = Yup.object().shape({
   tx_nome: Yup.string().required(),
@@ -46,6 +53,7 @@ const FormPersonHelped: React.FC<FormPersonHelpedProps> = ({
   const [leaderList, setLeaderList] = useState<Leader[]>([]);
 
   const theme = useTheme();
+  const auth = useAuth();
 
   useEffect(() => {
     api
@@ -54,44 +62,48 @@ const FormPersonHelped: React.FC<FormPersonHelpedProps> = ({
       .catch(() => {});
   }, []);
 
+  const formikInitialState = auth.isAdmin() ? formSchemaAdmin : formSchema;
+
   return (
     <Formik
-      validationSchema={formSchema}
+      validationSchema={formikInitialState}
       onSubmit={onSubmit}
       initialValues={{
         tx_nome: personHelped.tx_nome || '',
         nu_telefone: `(${personHelped.nu_ddd || ''}) ${personHelped.nu_telefone || ''}`,
         dt_nascimento: personHelped.dt_nascimento || new Date(),
-        leader: { label: '', value: 0 },
+        leader: { label: auth.user.tx_nome, value: auth.user.id },
       }}
     >
       {({ values, handleSubmit, errors, handleChange, setFieldValue, touched, setFieldTouched }) => (
         <Form title="Pessoa ajudada">
-          <Card.Content style={[styles.cardContent, { marginBottom: 5 }]}>
-            <Text style={[styles.label, { marginBottom: 5 }]}>Líder</Text>
+          {auth.isAdmin() && (
+            <Card.Content style={[styles.cardContent, { marginBottom: 5 }]}>
+              <Text style={[styles.label, { marginBottom: 5 }]}>Líder</Text>
 
-            <DropDownPicker
-              items={[
-                { value: 0, label: 'Selecione um líder' },
-                ...leaderList.map(leader => ({ label: leader.tx_nome, value: leader.id })),
-              ]}
-              onChangeItem={item => setFieldValue('leader', item || {})}
-              defaultValue={values.leader.value || 0}
-              multiple={false}
-              containerStyle={{ height: 55, marginLeft: 5 }}
-              itemStyle={{ justifyContent: 'flex-start' }}
-              labelStyle={{ fontFamily: 'Montserrat_medium', fontSize: 12 }}
-              placeholderStyle={{ color: AppColors.INPUT_DISABLE, fontFamily: 'Montserrat_medium', fontSize: 12 }}
-              style={{
-                borderTopLeftRadius: theme.roundness,
-                borderTopRightRadius: theme.roundness,
-                borderBottomLeftRadius: theme.roundness,
-                borderBottomRightRadius: theme.roundness,
-                borderColor: errors.leader ? theme.colors.error : theme.colors.disabled,
-                borderWidth: errors.leader ? 2 : 1,
-              }}
-            />
-          </Card.Content>
+              <DropDownPicker
+                items={[
+                  { label: auth.user.tx_nome, value: auth.user.id },
+                  ...leaderList.map(leader => ({ label: leader.tx_nome, value: leader.id })),
+                ]}
+                onChangeItem={item => setFieldValue('leader', item || {})}
+                defaultValue={values.leader.value || 0}
+                multiple={false}
+                containerStyle={{ height: 55, marginLeft: 5 }}
+                itemStyle={{ justifyContent: 'flex-start' }}
+                labelStyle={{ fontFamily: 'Montserrat_medium', fontSize: 12 }}
+                placeholderStyle={{ color: AppColors.INPUT_DISABLE, fontFamily: 'Montserrat_medium', fontSize: 12 }}
+                style={{
+                  borderTopLeftRadius: theme.roundness,
+                  borderTopRightRadius: theme.roundness,
+                  borderBottomLeftRadius: theme.roundness,
+                  borderBottomRightRadius: theme.roundness,
+                  borderColor: errors.leader ? theme.colors.error : theme.colors.disabled,
+                  borderWidth: errors.leader ? 2 : 1,
+                }}
+              />
+            </Card.Content>
+          )}
 
           <Card.Content style={styles.cardContent}>
             <Text style={styles.label}>Nome da pessoa</Text>
