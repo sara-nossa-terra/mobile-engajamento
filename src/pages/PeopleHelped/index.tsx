@@ -42,7 +42,7 @@ const PeopleHelped: React.FC = () => {
   // atualiza a lista de pessoas quando a página é focada (quando o usuário retorna da tela de cadastro de pessoas)
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      if (!loading) onRefresh();
+      onRefresh();
     });
 
     return unsubscribe;

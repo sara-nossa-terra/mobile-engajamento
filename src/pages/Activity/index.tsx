@@ -43,7 +43,7 @@ const ActivityComponent: React.FC = ({}) => {
   // atualiza as atividades quando a tela é focada de novo (quando o usuário volta da página de cadastro de atividades)
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      if (!loading) onRefresh();
+      onRefresh();
     });
     return unsubscribe;
   }, [navigation]);
