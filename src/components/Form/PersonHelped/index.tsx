@@ -34,9 +34,14 @@ interface SubmitFormData {
 interface FormPersonHelpedProps {
   personHelped: PersonHelped;
   onSubmit(data: SubmitFormData): void;
+  buttonText?: string;
 }
 
-const FormPersonHelped: React.FC<FormPersonHelpedProps> = ({ personHelped, onSubmit }) => {
+const FormPersonHelped: React.FC<FormPersonHelpedProps> = ({
+  personHelped,
+  onSubmit,
+  buttonText = 'ADICIONAR PESSOA',
+}) => {
   const [showsDatePicker, setShowsDatePicker] = useState<boolean>(false);
   const [leaderList, setLeaderList] = useState<Leader[]>([]);
 
@@ -157,7 +162,7 @@ const FormPersonHelped: React.FC<FormPersonHelpedProps> = ({ personHelped, onSub
 
           <Card.Content style={styles.cardContent}>
             <View style={styles.buttonContainer}>
-              <Button onPress={() => handleSubmit()} title="ADICIONAR PESSOA" />
+              <Button onPress={() => handleSubmit()} title={buttonText} />
             </View>
           </Card.Content>
         </Form>

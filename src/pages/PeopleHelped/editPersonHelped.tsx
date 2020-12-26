@@ -111,7 +111,7 @@ const EditPersonHelped: React.FC = () => {
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} enabled>
-        <PersonHelpedForm onSubmit={onSubmit} personHelped={person} />
+        <PersonHelpedForm onSubmit={onSubmit} personHelped={person} buttonText="SALVAR PESSOA" />
       </KeyboardAvoidingView>
 
       <Toast

@@ -112,7 +112,7 @@ const EditActivity: React.FC = () => {
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} enabled>
-        <FormActivity activity={activity} onSubmit={onSubmit} />
+        <FormActivity activity={activity} onSubmit={onSubmit} buttonText="SALVAR ATIVIDADE" />
       </KeyboardAvoidingView>
 
       <Toast

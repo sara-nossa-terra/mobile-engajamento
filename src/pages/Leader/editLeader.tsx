@@ -105,7 +105,7 @@ const EditLeader: React.FC = () => {
   return (
     <ScrollView style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} enabled>
-        <FormLeader leader={leader} onSubmit={onSubmit} />
+        <FormLeader buttonText="SALVAR LÍDER" leader={leader} onSubmit={onSubmit} />
       </KeyboardAvoidingView>
 
       <Toast

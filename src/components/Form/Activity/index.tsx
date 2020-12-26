@@ -24,9 +24,10 @@ interface SubmitFormData {
 interface FormActivityProps {
   activity: Activity;
   onSubmit(data: SubmitFormData): void;
+  buttonText?: string;
 }
 
-const FormActivity: React.FC<FormActivityProps> = ({ activity, onSubmit }) => {
+const FormActivity: React.FC<FormActivityProps> = ({ activity, onSubmit, buttonText = 'ADICIONAR ATIVIDADE' }) => {
   const [showsDatePicker, setShowsDatePicker] = useState<boolean>(false); // picker de data
 
   const theme = useTheme();
@@ -85,7 +86,7 @@ const FormActivity: React.FC<FormActivityProps> = ({ activity, onSubmit }) => {
 
           <Card.Content style={styles.cardContent}>
             <View style={styles.buttonContainer}>
-              <Button onPress={() => handleSubmit()} title="ADICIONAR ATIVIDADE" />
+              <Button onPress={() => handleSubmit()} title={buttonText} />
             </View>
           </Card.Content>
         </Form>

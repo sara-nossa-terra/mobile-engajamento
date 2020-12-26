@@ -35,9 +35,10 @@ interface SubmitFormData {
 interface FormLeaderProps {
   onSubmit(data: SubmitFormData): void;
   leader: Leader;
+  buttonText?: string;
 }
 
-const FormLeader: React.FC<FormLeaderProps> = ({ onSubmit, leader }) => {
+const FormLeader: React.FC<FormLeaderProps> = ({ onSubmit, leader, buttonText = 'ADICIONAR LÍDER' }) => {
   const [showsDatePicker, setShowsDatePicker] = useState<boolean>(false);
 
   const theme = useTheme();
@@ -177,7 +178,7 @@ const FormLeader: React.FC<FormLeaderProps> = ({ onSubmit, leader }) => {
 
             <Card.Content style={styles.cardContent}>
               <View style={styles.buttonContainer}>
-                <Button onPress={() => handleSubmit()} title="ADICIONAR LÍDER" />
+                <Button onPress={() => handleSubmit()} title={buttonText} />
               </View>
             </Card.Content>
           </Form>
