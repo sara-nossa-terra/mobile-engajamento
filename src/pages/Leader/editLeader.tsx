@@ -6,6 +6,7 @@ import Toast from '@components/Toast';
 import { AppColors, Leader } from '../../types';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import api from '@services/Api';
+import { separeDDDFromPhoneNumber } from '@utils/separeDDDfromPhoneNumber';
 
 interface SubmitFormData {
   tx_nome: string;
@@ -79,25 +80,30 @@ const EditLeader: React.FC = () => {
     return () => {
       clearTimeout(timer);
     };
-  }, [errorUpdateLeaderVisible]);
+  }, [setSuccessUpdateLeaderVisible]);
 
   const onSubmit = ({ email, nu_telefone, dt_nascimento, password, tx_nome }: SubmitFormData) => {
+    const { dddPhoneNumber, phoneNumber } = separeDDDFromPhoneNumber(nu_telefone);
+
     api
       .put(`/v1/leaders/${leaderId}`, {
-        email,
-        nu_telefone,
+        email: email.toLowerCase(),
+        nu_telefone: phoneNumber,
+        nu_ddd: dddPhoneNumber,
         dt_nascimento,
         password,
         tx_nome,
         lider_id: leader.lider_id.id,
       })
       .then(() => {
-        Alert.alert('sucesso');
+        setSuccessUpdateLeaderVisible(true);
       })
-      .catch(() => {
+      .catch(err => {
         setErrorUpdateLeaderVisible(true);
       })
-      .finally(() => {});
+      .finally(() => {
+        console.log('ok');
+      });
   };
 
   if (loading) return <AppLoading />;
@@ -131,7 +137,7 @@ const EditLeader: React.FC = () => {
         icon="check"
         backgroundColor={AppColors.BLUE}
         iconColor={AppColors.GREEN}
-        visible={errorUpdateLeaderVisible}
+        visible={successUpdateLeaderVisible}
         onDismiss={() => {
           setSuccessUpdateLeaderVisible(false);
           navigation.goBack();
