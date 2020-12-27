@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { KeyboardAvoidingView, ScrollView, StyleSheet, Platform, Alert } from 'react-native';
+import { KeyboardAvoidingView, ScrollView, StyleSheet, Platform } from 'react-native';
 import AppLoading from '@components/AppLoading';
 import FormLeader from '@components/Form/Leader';
 import Toast from '@components/Toast';
@@ -85,24 +85,40 @@ const EditLeader: React.FC = () => {
   const onSubmit = ({ email, nu_telefone, dt_nascimento, password, tx_nome }: SubmitFormData) => {
     const { dddPhoneNumber, phoneNumber } = separeDDDFromPhoneNumber(nu_telefone);
 
+    /**
+     *
+     * O ADMIN engajamento não possui lider_id
+     * Visto isso, foi necessário fazer a logica abaixo
+     * para verificar se o líder que queremos editar possui o líder_id
+     * Se não possui, não mandamos a requisição pro back
+     *
+     */
+    const data = leader.lider_id
+      ? {
+          email: email.toLowerCase(),
+          nu_telefone: phoneNumber,
+          nu_ddd: dddPhoneNumber,
+          dt_nascimento,
+          password,
+          tx_nome,
+          lider_id: leader.lider_id.id,
+        }
+      : {
+          email: email.toLowerCase(),
+          nu_telefone: phoneNumber,
+          nu_ddd: dddPhoneNumber,
+          dt_nascimento,
+          password,
+          tx_nome,
+        };
+
     api
-      .put(`/v1/leaders/${leaderId}`, {
-        email: email.toLowerCase(),
-        nu_telefone: phoneNumber,
-        nu_ddd: dddPhoneNumber,
-        dt_nascimento,
-        password,
-        tx_nome,
-        lider_id: leader.lider_id.id,
-      })
+      .put(`/v1/leaders/${leaderId}`, data)
       .then(() => {
         setSuccessUpdateLeaderVisible(true);
       })
       .catch(err => {
         setErrorUpdateLeaderVisible(true);
-      })
-      .finally(() => {
-        console.log('ok');
       });
   };
 

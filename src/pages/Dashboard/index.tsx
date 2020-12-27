@@ -37,8 +37,8 @@ const Dashboard: React.FC = () => {
       })
       .then(response => {
         // os dados estão sendo retornados como um objeto de atividades e pessoas ajudadas, por isso a coonversão para array
-        const activityListData = response.data.data['activities'];
-        const personHelpedListData = response.data.data['helpedPerson'];
+        const activityListData = response.data.data['activities'] || {};
+        const personHelpedListData = response.data.data['helpedPerson'] || {};
 
         // converte a lista de atividades e pessoas para array (estão retornando como objeto)
         const activityListArray = Object.values(activityListData[0]) as Activity[];
@@ -84,8 +84,8 @@ const Dashboard: React.FC = () => {
       })
       .then(response => {
         // os dados estão sendo retornados como um objeto de atividades e pessoas ajudadas, por isso a coonversão para array
-        const activityListData = response.data.data['activities'];
-        const personHelpedListData = response.data.data['helpedPerson'];
+        const activityListData = response.data.data['activities'] || {};
+        const personHelpedListData = response.data.data['helpedPerson'] || {};
 
         // converte a lista de atividades e pessoas para array (estão retornando como objeto)
         const activityListArray = Object.values(activityListData[0]) as Activity[];
@@ -94,7 +94,7 @@ const Dashboard: React.FC = () => {
         setActivityList(activityListArray);
         setPersonHelpedList(personHelpedListArray);
       })
-      .catch(() => {
+      .catch(er => {
         setActivityList([]);
         setPersonHelpedList([]);
         setErrorShowActivityToastVisible(true);
