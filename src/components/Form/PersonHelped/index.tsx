@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Card, Text, TextInput, useTheme } from 'react-native-paper';
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -64,6 +64,13 @@ const FormPersonHelped: React.FC<FormPersonHelpedProps> = ({
 
   const formikInitialState = auth.isAdmin() ? formSchemaAdmin : formSchema;
 
+  const leaderName = personHelped.lider_id.tx_nome;
+  const leaderId = personHelped.lider_id.id;
+
+  let dropdownItems = leaderList.map(leader => ({ label: leader.tx_nome, value: leader.id }));
+  dropdownItems = dropdownItems.filter(i => i.value != leaderId);
+  dropdownItems.push({ label: leaderName, value: leaderId });
+
   return (
     <Formik
       validationSchema={formikInitialState}
@@ -72,7 +79,7 @@ const FormPersonHelped: React.FC<FormPersonHelpedProps> = ({
         tx_nome: personHelped.tx_nome || '',
         nu_telefone: `(${personHelped.nu_ddd || ''}) ${personHelped.nu_telefone || ''}`,
         dt_nascimento: personHelped.dt_nascimento || new Date(),
-        leader: { label: auth.user.tx_nome, value: auth.user.id },
+        leader: { label: leaderName, value: leaderId },
       }}
     >
       {({ values, handleSubmit, errors, handleChange, setFieldValue, touched, setFieldTouched }) => (
@@ -82,10 +89,7 @@ const FormPersonHelped: React.FC<FormPersonHelpedProps> = ({
               <Text style={[styles.label, { marginBottom: 5 }]}>Líder</Text>
 
               <DropDownPicker
-                items={[
-                  { label: auth.user.tx_nome, value: auth.user.id },
-                  ...leaderList.map(leader => ({ label: leader.tx_nome, value: leader.id })),
-                ]}
+                items={dropdownItems}
                 onChangeItem={item => setFieldValue('leader', item || {})}
                 defaultValue={values.leader.value || 0}
                 multiple={false}
