@@ -23,7 +23,7 @@ const PeopleHelped: React.FC = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    const url = auth.user.id === 1 ? '/v1/helpedPersons/' : `/v1/helpedPersons/leader/${auth.user.id}`;
+    const url = auth.isAdmin() ? '/v1/helpedPersons/' : `/v1/helpedPersons/leader/${auth.user.id}`;
     api
       .get(url)
       .then(response => {
