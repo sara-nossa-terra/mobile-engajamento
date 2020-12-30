@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import FormActivity from '@components/Form/Activity';
+import { View, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { Card, Text, useTheme, TextInput } from 'react-native-paper';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import AppLoading from '@components/AppLoading';
 import Toast from '@components/Toast';
+import Form from '@components/Form';
+import Button from '@components/Button';
+import Input from '@components/Input';
+import { useAuth } from '@hooks/Auth';
 import api from '@services/Api';
-import { formatAmericanDatetimeToDate, formatDateToAmericanDatetime } from '@utils/formatAmericanDatetimeToDate';
-import { Activity, AppColors } from '../../types';
+import { Formik } from 'formik';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
+import { formSchema } from './utils/formValidation';
+import { formatDateToAmericanDatetime, formatAmericanDatetimeToDate } from '@utils/formatAmericanDatetimeToDate';
+import { AppColors, Activity } from '../../types';
 
 interface RouteParams {
   activityId: number;
@@ -21,12 +30,16 @@ const EditActivity: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [activity, setActivity] = useState<Activity>({} as Activity);
 
+  const [showsDatePicker, setShowsDatePicker] = useState<boolean>(false); // picker de data
+
   const [errorToastVisible, setErrorToastVisible] = useState<boolean>(false);
   const [successToastVisible, setSuccessToastVisible] = useState<boolean>(false);
   const [errorShowActivityToastVisible, setErrorShowActivityToastVisible] = useState<boolean>(false);
 
   const route = useRoute();
   const navigation = useNavigation();
+  const theme = useTheme();
+  const auth = useAuth();
 
   const { activityId = 0 } = route.params as RouteParams;
 
@@ -37,14 +50,13 @@ const EditActivity: React.FC = () => {
         setActivity({
           id: response.data.data.id,
           tx_nome: response.data.data.tx_nome,
-          dt_dia: formatAmericanDatetimeToDate(response.data.data.dt_dia),
+          dt_dia: response.data.data.dt_dia,
         });
+
+        setLoading(false);
       })
       .catch(() => {
-        setErrorShowActivityToastVisible(true);
-      })
-      .finally(() => {
-        setLoading(false);
+        navigation.navigate('ActivityManageStack');
       });
   }, []);
 
@@ -54,7 +66,7 @@ const EditActivity: React.FC = () => {
       if (errorToastVisible) {
         setErrorToastVisible(false);
       }
-    }, 5000);
+    }, 2500);
 
     return () => {
       clearTimeout(timer);
@@ -68,7 +80,7 @@ const EditActivity: React.FC = () => {
         setSuccessToastVisible(false);
         navigation.goBack();
       }
-    }, 5000);
+    }, 2500);
 
     return () => {
       clearTimeout(timer);
@@ -81,7 +93,7 @@ const EditActivity: React.FC = () => {
       if (errorShowActivityToastVisible) {
         setErrorShowActivityToastVisible(false);
       }
-    }, 5000);
+    }, 2500);
 
     return () => {
       clearTimeout(timer);
@@ -103,10 +115,10 @@ const EditActivity: React.FC = () => {
 
     api
       .put(`/v1/activities/${activityId}`, { tx_nome, dt_dia: dt_dia_formated })
-      .then(response => {
+      .then(() => {
         setSuccessToastVisible(true);
       })
-      .catch(err => {
+      .catch(() => {
         setErrorToastVisible(true);
       });
   };
@@ -116,7 +128,65 @@ const EditActivity: React.FC = () => {
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} enabled>
-        <FormActivity activity={activity} onSubmit={onSubmit} buttonText="SALVAR ATIVIDADE" />
+        <Formik
+          onSubmit={onSubmit}
+          validationSchema={formSchema}
+          initialValues={{
+            tx_nome: activity.tx_nome || '',
+            dt_dia: formatAmericanDatetimeToDate(activity.dt_dia) || new Date(),
+          }}
+        >
+          {({ values, errors, handleSubmit, setFieldValue, handleBlur }) => (
+            <Form title="Atividade">
+              <Card.Content style={styles.cardContent}>
+                <Text style={styles.label}>Nome da atividade</Text>
+
+                <Input
+                  value={values.tx_nome}
+                  placeholder="Nome da atividade"
+                  onChangeText={text => setFieldValue('tx_nome', text)}
+                  onBlur={handleBlur('tx_nome')}
+                  error={errors.tx_nome ? true : false}
+                  theme={theme}
+                />
+              </Card.Content>
+
+              <Card.Content style={styles.cardContent}>
+                <Text style={styles.label}>Dia da atividade</Text>
+
+                <Input
+                  disabled
+                  style={{ width: '45%' }}
+                  value={format(new Date(values.dt_dia), 'd - MMM - yyyy', {
+                    locale: ptBR,
+                  })}
+                  right={<TextInput.Icon name="calendar-month-outline" onPress={() => setShowsDatePicker(true)} />}
+                  theme={theme}
+                />
+
+                {showsDatePicker && (
+                  <DateTimePicker
+                    value={new Date(values.dt_dia)}
+                    mode="date"
+                    is24Hour
+                    display="default"
+                    onTouchCancel={() => setShowsDatePicker(false)}
+                    onChange={(e, selectedDate) => {
+                      setShowsDatePicker(false);
+                      if (selectedDate) setFieldValue('dt_dia', selectedDate);
+                    }}
+                  />
+                )}
+              </Card.Content>
+
+              <Card.Content style={styles.cardContent}>
+                <View style={styles.buttonContainer}>
+                  <Button onPress={() => handleSubmit()} title={'SALVAR'} />
+                </View>
+              </Card.Content>
+            </Form>
+          )}
+        </Formik>
       </KeyboardAvoidingView>
 
       <Toast
@@ -153,6 +223,18 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: AppColors.BLUE,
     flex: 1,
+  },
+
+  // form atividades
+  cardContent: {
+    marginBottom: 10,
+  },
+  label: {
+    fontFamily: 'Montserrat_medium',
+    fontSize: 12,
+  },
+  buttonContainer: {
+    marginVertical: 15,
   },
 });
 
