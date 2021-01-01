@@ -121,6 +121,18 @@ const Dashboard: React.FC = () => {
   };
 
   const onPressThumbsUp = (person: PersonHelped) => {
+    let isThumbsup = false;
+
+    person.atividade?.forEach(personActivity => {
+      if (personActivity.id === activitySelected.id) {
+        if (personActivity.thumbsup) {
+          isThumbsup = true;
+        }
+      }
+    });
+
+    if (isThumbsup) return;
+
     api
       .post('/v1/regimentation/review', {
         atividade_id: activitySelected.id,
@@ -146,6 +158,18 @@ const Dashboard: React.FC = () => {
   };
 
   const onPressThumbsDown = (person: PersonHelped) => {
+    let isThumbsdown = false;
+
+    person.atividade?.forEach(personActivity => {
+      if (personActivity.id === activitySelected.id) {
+        if (!personActivity.thumbsup) {
+          isThumbsdown = true;
+        }
+      }
+    });
+
+    if (isThumbsdown) return;
+
     let reviewID = 0;
 
     const newPersonHelpedList = personHelpedList.map(p => {
