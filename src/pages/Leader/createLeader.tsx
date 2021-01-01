@@ -3,6 +3,7 @@ import { View, StyleSheet, KeyboardAvoidingView, ScrollView, Platform } from 're
 import { Card, TextInput, Text, useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { TextInputMask } from 'react-native-masked-text';
 import Input from '@components/Input';
 import Form from '@components/Form';
@@ -25,7 +26,7 @@ interface SubmitFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  user_type: number;
+  perfil: { value: number, label: string };
 }
 
 const CreateLeader: React.FC = () => {
@@ -77,7 +78,7 @@ const CreateLeader: React.FC = () => {
     navigation.goBack();
   };
 
-  const onSubmit = ({ tx_nome, dt_nascimento, email, nu_telefone, password }: SubmitFormData) => {
+  const onSubmit = ({ tx_nome, dt_nascimento, email, nu_telefone, password , perfil}: SubmitFormData) => {
     const { dddPhoneNumber, phoneNumber } = separeDDDFromPhoneNumber(nu_telefone);
 
     api
@@ -89,12 +90,13 @@ const CreateLeader: React.FC = () => {
         lider_id: auth.user.id,
         nu_ddd: dddPhoneNumber,
         nu_telefone: phoneNumber,
+        perfil_id: perfil.value
       })
       .then(() => {
-        setSuccessToastVisible(true);
+         setSuccessToastVisible(true);
       })
       .catch(() => {
-        setErrorToastVisible(true);
+         setErrorToastVisible(true);
       });
   };
 
@@ -113,7 +115,7 @@ const CreateLeader: React.FC = () => {
             email: '',
             password: '',
             confirmPassword: '',
-            user_type: 2, // 1 para admin | 2 para líder
+            perfil: { value: 2, label: 'Líder'  }, // 1 para admin | 2 para líder
           }}
         >
           {({ values, touched, setFieldTouched, handleSubmit, handleChange, setFieldValue, handleBlur, errors }) => (
@@ -191,7 +193,7 @@ const CreateLeader: React.FC = () => {
 
               <Form title="CRIAR CONTA">
                 <Card.Content style={styles.cardContent}>
-                  <Text style={styles.label}>E-mail</Text>
+                  <Text theme={theme} style={styles.label}>E-mail</Text>
 
                   <Input
                     textContentType="emailAddress"
@@ -204,6 +206,33 @@ const CreateLeader: React.FC = () => {
                     theme={theme}
                   />
                 </Card.Content>
+
+
+                {auth.isAdmin() && (
+                <Card.Content style={[styles.cardContent, { marginBottom: 5 }]}>
+                  <Text style={[styles.label, { marginBottom: 5 }]}>Tipo de usuário</Text>
+
+                  <DropDownPicker
+                    items={[{ value: 1, label: 'Administrador',  }, {  value: 2, label: 'Líder'}]}
+                    onChangeItem={item => setFieldValue('perfil', item || { value: 2, label: 'Líder' })}
+                    defaultValue={values.perfil.value || 2}
+                    multiple={false}
+                    containerStyle={{ height: 55, marginLeft: 5 }}
+                    itemStyle={{ justifyContent: 'flex-start' }}
+                    labelStyle={{ fontFamily: 'Montserrat_medium', fontSize: 12 }}
+                    placeholderStyle={{ color: AppColors.INPUT_DISABLE, fontFamily: 'Montserrat_medium', fontSize: 12 }}
+                    style={{
+                      borderTopLeftRadius: theme.roundness,
+                      borderTopRightRadius: theme.roundness,
+                      borderBottomLeftRadius: theme.roundness,
+                      borderBottomRightRadius: theme.roundness,
+                      borderColor: errors.perfil?.value ? theme.colors.error : theme.colors.disabled,
+                      borderWidth: errors.perfil?.value ? 2 : 1,
+                    }}
+                  />
+                </Card.Content>
+              )}
+
 
                 <Card.Content style={styles.cardContent}>
                   <Text style={styles.label}>Senha</Text>

@@ -4,6 +4,7 @@ import { Card, TextInput, Text, useTheme } from 'react-native-paper';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInputMask } from 'react-native-masked-text';
+import DropDownPicker from 'react-native-dropdown-picker';
 import Input from '@components/Input';
 import Form from '@components/Form';
 import Button from '@components/Button';
@@ -15,7 +16,8 @@ import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { separeDDDFromPhoneNumber } from '@utils/separeDDDfromPhoneNumber';
 import { Leader, AppColors } from '../../types';
-import { formSchema } from './utils/formValidation';
+import { formSchemaUpdateLeader } from './utils/formValidation';
+import { useAuth } from '@hooks/Auth';
 
 interface SubmitFormData {
   tx_nome: string;
@@ -24,7 +26,7 @@ interface SubmitFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  user_type: number;
+  perfil: { label: string; value: number };
 }
 
 const EditLeader: React.FC = () => {
@@ -40,6 +42,7 @@ const EditLeader: React.FC = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const theme = useTheme();
+  const auth = useAuth();
 
   const { leaderId = 0 } = route.params as { leaderId: number };
 
@@ -93,39 +96,32 @@ const EditLeader: React.FC = () => {
     };
   }, [setSuccessUpdateLeaderVisible]);
 
-  const onSubmit = ({ email, nu_telefone, dt_nascimento, password, tx_nome }: SubmitFormData) => {
+  const onSubmit = ({ email, nu_telefone, dt_nascimento, password, tx_nome, perfil }: SubmitFormData) => {
     const { dddPhoneNumber, phoneNumber } = separeDDDFromPhoneNumber(nu_telefone);
 
-    /**
-     *
-     * O ADMIN engajamento não possui lider_id
-     * Visto isso, foi necessário fazer a logica abaixo
-     * para verificar se o líder que queremos editar possui o líder_id
-     * Se não possui, não mandamos a requisição pro back
-     *
-     */
-    const data = leader.lider_id
-      ? {
-          email: email.toLowerCase(),
-          nu_telefone: phoneNumber,
-          nu_ddd: dddPhoneNumber,
-          dt_nascimento,
-          password,
-          tx_nome,
-          lider_id: leader.lider_id.id,
-        }
-      : {
-          email: email.toLowerCase(),
-          nu_telefone: phoneNumber,
-          nu_ddd: dddPhoneNumber,
-          dt_nascimento,
-          password,
-          tx_nome,
-        };
+    const data = {
+      tx_nome,
+      dt_nascimento,
+      nu_ddd: dddPhoneNumber,
+      nu_telefone: phoneNumber,
+      perfil_id: perfil.value,
+      email,
+    };
+
+    if (password) {
+      // @ts-ignore
+      data['password'] = password;
+    }
 
     api
       .put(`/v1/leaders/${leaderId}`, data)
-      .then(() => {
+      .then(response => {
+        const newUserData = response.data.data as Leader;
+
+        if (newUserData.id === auth.user.id) {
+          auth.updateUser(newUserData);
+        }
+
         setSuccessUpdateLeaderVisible(true);
       })
       .catch(() => {
@@ -135,12 +131,20 @@ const EditLeader: React.FC = () => {
 
   if (loading) return <AppLoading />;
 
+  const { id = 2, tx_nome = 'Líder' } = leader.perfil;
+  let dropdownItems = [
+    { value: 1, label: 'Administrador' },
+    { value: 2, label: 'Líder' },
+  ];
+  dropdownItems = dropdownItems.filter(i => i.value != id);
+  dropdownItems.unshift({ label: tx_nome, value: id });
+
   return (
     <ScrollView style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} enabled>
         <Formik
           onSubmit={onSubmit}
-          validationSchema={formSchema}
+          validationSchema={formSchemaUpdateLeader}
           initialValues={{
             tx_nome: leader.tx_nome,
             dt_nascimento: leader.dt_nascimento,
@@ -148,7 +152,7 @@ const EditLeader: React.FC = () => {
             email: leader.email,
             password: '',
             confirmPassword: '',
-            user_type: 2, // 1 para admin | 2 para líder
+            perfil: { label: tx_nome, value: id }, // 1 para admin | 2 para líder
           }}
         >
           {({ values, touched, setFieldTouched, handleSubmit, handleChange, setFieldValue, handleBlur, errors }) => (
@@ -239,6 +243,35 @@ const EditLeader: React.FC = () => {
                     theme={theme}
                   />
                 </Card.Content>
+
+                {auth.isAdmin() && (
+                  <Card.Content style={[styles.cardContent, { marginBottom: 5 }]}>
+                    <Text style={[styles.label, { marginBottom: 5 }]}>Tipo de usuário</Text>
+
+                    <DropDownPicker
+                      items={dropdownItems}
+                      onChangeItem={item => setFieldValue('perfil', item || { value: 2, label: 'Líder' })}
+                      defaultValue={values.perfil.value || 2}
+                      multiple={false}
+                      containerStyle={{ height: 55, marginLeft: 5 }}
+                      itemStyle={{ justifyContent: 'flex-start' }}
+                      labelStyle={{ fontFamily: 'Montserrat_medium', fontSize: 12 }}
+                      placeholderStyle={{
+                        color: AppColors.INPUT_DISABLE,
+                        fontFamily: 'Montserrat_medium',
+                        fontSize: 12,
+                      }}
+                      style={{
+                        borderTopLeftRadius: theme.roundness,
+                        borderTopRightRadius: theme.roundness,
+                        borderBottomLeftRadius: theme.roundness,
+                        borderBottomRightRadius: theme.roundness,
+                        borderColor: errors.perfil?.value ? theme.colors.error : theme.colors.disabled,
+                        borderWidth: errors.perfil?.value ? 2 : 1,
+                      }}
+                    />
+                  </Card.Content>
+                )}
 
                 <Card.Content style={styles.cardContent}>
                   <Text style={styles.label}>Senha</Text>
