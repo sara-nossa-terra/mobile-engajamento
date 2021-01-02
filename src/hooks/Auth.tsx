@@ -18,8 +18,9 @@ interface AuthContextProps {
   user: Leader;
   loading: boolean;
   login(credentials: LoginCredentials): Promise<void>;
-  logOut(): Promise<void>;
+  logOut(): Promise<void> | void;
   isAdmin(): boolean;
+  updateUser(newUser: Leader): void;
 }
 
 const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
@@ -76,26 +77,39 @@ const AuthProvider: React.FC = ({ children }) => {
     setData({ token, user });
   }, []);
 
-  const logOut = useCallback(async () => {
+  const logOut = useCallback(() => {
+    setLoading(true);
     AsyncStorage.multiRemove(['@Engajamento:token', '@Engajamento:user'])
       .then(() => {
         setData({} as AuthState);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        setTimeout(() => setLoading(false), 2000);
+      });
   }, []);
 
   const isAdmin = () => {
     let admin = false;
 
-    if (data.user.id == 1) {
+    if (data.user.perfil.id === 1) {
       admin = true;
     }
 
     return admin;
   };
 
+  const updateUser = useCallback((newUser: Leader) => {
+    const { token } = data;
+    AsyncStorage.setItem('@Engajamento:user', JSON.stringify(newUser))
+      .then(() => {
+        setData({ token, user: newUser });
+      })
+      .catch(() => {});
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ isAdmin, login, loading, logOut, token: data.token, user: data.user }}>
+    <AuthContext.Provider value={{ updateUser, isAdmin, login, loading, logOut, token: data.token, user: data.user }}>
       {children}
     </AuthContext.Provider>
   );

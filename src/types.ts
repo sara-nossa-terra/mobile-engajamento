@@ -33,6 +33,11 @@ export interface Leader {
   nu_ddd: number;
   nu_telefone: number;
   lider_id: Leader;
+  perfil: {
+    id: number; 
+    tx_descricao?: string;
+    tx_nome: string;
+  }
 }
 
 export interface PersonHelped {

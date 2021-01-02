@@ -121,6 +121,18 @@ const Dashboard: React.FC = () => {
   };
 
   const onPressThumbsUp = (person: PersonHelped) => {
+    let isThumbsup = false;
+
+    person.atividade?.forEach(personActivity => {
+      if (personActivity.id === activitySelected.id) {
+        if (personActivity.thumbsup) {
+          isThumbsup = true;
+        }
+      }
+    });
+
+    if (isThumbsup) return;
+
     api
       .post('/v1/regimentation/review', {
         atividade_id: activitySelected.id,
@@ -146,6 +158,18 @@ const Dashboard: React.FC = () => {
   };
 
   const onPressThumbsDown = (person: PersonHelped) => {
+    let isThumbsdown = false;
+
+    person.atividade?.forEach(personActivity => {
+      if (personActivity.id === activitySelected.id) {
+        if (!personActivity.thumbsup) {
+          isThumbsdown = true;
+        }
+      }
+    });
+
+    if (isThumbsdown) return;
+
     let reviewID = 0;
 
     const newPersonHelpedList = personHelpedList.map(p => {
@@ -175,6 +199,24 @@ const Dashboard: React.FC = () => {
       .catch(() => {});
   };
 
+  const calculateThumbsup = (activity: Activity) => {
+    let counter = 0;
+
+    personHelpedList.forEach(person => {
+      if (person.atividade) {
+        person.atividade.forEach(personActivity => {
+          if (personActivity.id === activity.id) {
+            if (personActivity.thumbsup) {
+              counter++;
+            }
+          }
+        });
+      }
+    });
+
+    return counter;
+  };
+
   if (loading) return <AppLoading />;
 
   return (
@@ -202,9 +244,14 @@ const Dashboard: React.FC = () => {
               <View style={styles.activityNameContainer}>
                 <Text style={styles.activityName}>{item.tx_nome} </Text>
               </View>
-              <TouchableOpacity onPress={() => onSelectActivity(item)} style={styles.activityIcon}>
-                <Icon name="chevron-right" size={30} color={AppColors.BLUE} />
-              </TouchableOpacity>
+              <View style={styles.counterContainer}>
+                <View style={styles.counter}>
+                  <Text style={styles.counterText}>{calculateThumbsup(item)} </Text>
+                </View>
+                <TouchableOpacity onPress={() => onSelectActivity(item)} style={styles.activityIcon}>
+                  <Icon name="chevron-right" size={30} color={AppColors.BLUE} />
+                </TouchableOpacity>
+              </View>
             </View>
           )}
           ItemSeparatorComponent={Divider} // renderizado entre cada componente (cada atividade)
@@ -246,4 +293,9 @@ const styles = StyleSheet.create({
   // Lista de atividades vazia
   empty: { marginVertical: 20, alignItems: 'center', justifyContent: 'center' },
   emptyText: { marginVertical: 20, fontFamily: 'Montserrat_medium', fontSize: 14 },
+
+  // contador
+  counterContainer: { flexDirection: 'row' },
+  counter: { justifyContent: 'center' },
+  counterText: { fontFamily: 'Montserrat_extra_bold', fontSize: 12, color: AppColors.BLUE },
 });
