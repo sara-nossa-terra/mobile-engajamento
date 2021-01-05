@@ -141,7 +141,6 @@ const CreateLeader: React.FC = () => {
                     disabled
                     value={format(new Date(values.dt_nascimento), 'd - M - yyyy', { locale: ptBR })}
                     error={errors.dt_nascimento ? true : false}
-                    style={{ width: '45%' }}
                     right={<TextInput.Icon name="calendar-month-outline" onPress={() => setShowsDatePicker(true)} />}
                     theme={theme}
                   />
@@ -172,7 +171,7 @@ const CreateLeader: React.FC = () => {
                     value={values.nu_telefone}
                     onChangeText={handleChange('nu_telefone')}
                     onBlur={() => setFieldTouched('nu_telefone', true)}
-                    style={[styles.input, { width: '65%', paddingLeft: 5 }]}
+                    style={[styles.input, { paddingLeft: 5 }]}
                     mode="outlined"
                     theme={theme}
                     render={props => (

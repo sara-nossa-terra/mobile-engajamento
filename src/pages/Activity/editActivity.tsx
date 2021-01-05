@@ -156,7 +156,6 @@ const EditActivity: React.FC = () => {
 
                 <Input
                   disabled
-                  style={{ width: '45%' }}
                   value={format(new Date(values.dt_dia), 'd - MMM - yyyy', {
                     locale: ptBR,
                   })}

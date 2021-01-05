@@ -205,7 +205,7 @@ const EditPersonHelped: React.FC = () => {
                 <Input
                   disabled
                   value={format(new Date(values.dt_nascimento), 'd - MMM - yyyy', { locale: ptBR })}
-                  style={[{ width: '45%' }, styles.input]}
+                  style={[styles.input]}
                   right={<TextInput.Icon name="calendar-month-outline" onPress={() => setShowsDatePicker(true)} />}
                   theme={theme}
                 />
@@ -236,7 +236,7 @@ const EditPersonHelped: React.FC = () => {
                   value={values.nu_telefone}
                   onChangeText={handleChange('nu_telefone')}
                   onBlur={() => setFieldTouched('nu_telefone', true)}
-                  style={[styles.input, { width: '65%', paddingLeft: 5 }]}
+                  style={[styles.input, { paddingLeft: 5 }]}
                   mode="outlined"
                   theme={theme}
                   render={props => (
