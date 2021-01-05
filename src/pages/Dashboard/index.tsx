@@ -139,11 +139,14 @@ const Dashboard: React.FC = () => {
         pessoa_id: person.id,
         dt_periodo: date,
       })
-      .then(() => {
+      .then(response => {
+        const reviewId = response.data.data.id as number;
+
         const newPersonHelpedList = personHelpedList.map(p => {
           if (p.id === person.id && p.atividade) {
             p.atividade.map(a => {
               if (a.id === activitySelected.id) {
+                a.reviewId = reviewId;
                 a.thumbsup = true;
               }
             });
