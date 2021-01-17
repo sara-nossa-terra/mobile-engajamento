@@ -160,7 +160,7 @@ const AppNavigator: React.FC = () => {
         name="Dashboard"
         component={DashboardStackNavigator}
         options={{
-          drawerIcon: () => <DrawerLabel title="INICIAL" icon="home" color={AppColors.BLUE} />,
+          drawerIcon: () => <DrawerLabel title="CONSOLIDAÇÃO" icon="home" color={AppColors.BLUE} />,
         }}
       />
 
