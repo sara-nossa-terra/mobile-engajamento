@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Keyboard,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { Switch, Text, useTheme } from 'react-native-paper';
 import { Button } from 'native-base';
@@ -80,9 +81,7 @@ const Login: React.FC = () => {
 
             <KeyboardAvoidingView enabled behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.form}>
               <View style={styles.formHeader}>
-                <Text numberOfLines={1} ellipsizeMode="clip" adjustsFontSizeToFit={true} style={styles.title}>
-                  ENGAJAMENTO
-                </Text>
+                <Image source={require('../../assets/icon.png')} style={{ width: 80, height: 70 }} />
                 <Text style={styles.subtitle}>Inicie uma sessão</Text>
               </View>
               <Input

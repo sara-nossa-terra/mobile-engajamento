@@ -116,11 +116,7 @@ const EditLeader: React.FC = () => {
     api
       .put(`/v1/leaders/${leaderId}`, data)
       .then(response => {
-        const newUserData = response.data.data as Leader;
-
-        if (newUserData.id === auth.user.id) {
-          auth.updateUser(newUserData);
-        }
+        response.data.data as Leader;
 
         setSuccessUpdateLeaderVisible(true);
       })

@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity, Image } from 'react-native';
-import { Text, Divider } from 'react-native-paper';
+import { Text, Divider, useTheme } from 'react-native-paper';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import { Feather as Icon } from '@expo/vector-icons';
@@ -132,7 +132,8 @@ const PeopleHelpedNavigator: React.FC = () => (
  *
  */
 const AppNavigator: React.FC = () => {
-  const { logOut } = useAuth();
+  const auth = useAuth();
+  const theme = useTheme();
 
   return (
     <Drawer.Navigator
@@ -142,15 +143,19 @@ const AppNavigator: React.FC = () => {
         <DrawerContentScrollView {...props} contentContainerStyle={styles.drawerContainer}>
           <View>
             <View style={styles.drawerHeader}>
-              <Text style={styles.drawerHeaderText}>Menu</Text>
+              <Text theme={theme} style={styles.drawerHeaderText}>
+                Menu
+              </Text>
             </View>
-            <Divider style={{ marginBottom: 16 }} />
+            <Divider theme={theme} style={{ marginBottom: 16 }} />
             <DrawerItemList {...props} />
           </View>
 
           <View>
-            <TouchableOpacity onPress={logOut} activeOpacity={0.1}>
-              <Text style={styles.drawerLogout}>SAIR</Text>
+            <TouchableOpacity onPress={auth.logOut} activeOpacity={0.1}>
+              <Text theme={theme} style={styles.drawerLogout}>
+                SAIR
+              </Text>
             </TouchableOpacity>
           </View>
         </DrawerContentScrollView>
@@ -180,13 +185,15 @@ const AppNavigator: React.FC = () => {
         }}
       />
 
-      <Drawer.Screen
-        name="Activity"
-        component={ActivityNavigator}
-        options={{
-          drawerIcon: () => <DrawerLabel title="ATIVIDADES" icon="plus-square" color={AppColors.BLUE} />,
-        }}
-      />
+      {auth.isAdmin() && (
+        <Drawer.Screen
+          name="Activity"
+          component={ActivityNavigator}
+          options={{
+            drawerIcon: () => <DrawerLabel title="ATIVIDADES" icon="plus-square" color={AppColors.BLUE} />,
+          }}
+        />
+      )}
     </Drawer.Navigator>
   );
 };
