@@ -91,3 +91,14 @@ O aplicativo mobile do sistema Engajamento foi construida com React Native. Abai
 Várias pessoas colaboraram com o desenvimento do projeto ENGAJAMENTO e decidimos centralizar em um único local todos os que participaram com o desenvolvimento do projeto.
 
 Clique [aqui](https://github.com/sara-nossa-terra/engajamento/graphs/contributors) para visualizar.
+
+
+## Problemas e dúvidas frequentes
+
+### Resetando cache expo 
+````bash
+  $ npm start -c 
+  ou
+  $ yarn start -c
+````
+
