@@ -87,14 +87,14 @@ const EditLeader: React.FC = () => {
     const timer = setTimeout(() => {
       if (successUpdateLeaderVisible) {
         setSuccessUpdateLeaderVisible(false);
-        navigation.goBack();
+        navigation.navigate('LeaderManageStack');
       }
     }, 2500);
 
     return () => {
       clearTimeout(timer);
     };
-  }, [setSuccessUpdateLeaderVisible]);
+  }, [successUpdateLeaderVisible]);
 
   const onSubmit = ({ email, nu_telefone, dt_nascimento, password, tx_nome, perfil }: SubmitFormData) => {
     const { dddPhoneNumber, phoneNumber } = separeDDDFromPhoneNumber(nu_telefone);
@@ -115,9 +115,7 @@ const EditLeader: React.FC = () => {
 
     api
       .put(`/v1/leaders/${leaderId}`, data)
-      .then(response => {
-        response.data.data as Leader;
-
+      .then(() => {
         setSuccessUpdateLeaderVisible(true);
       })
       .catch(() => {
@@ -336,7 +334,7 @@ const EditLeader: React.FC = () => {
         visible={successUpdateLeaderVisible}
         onDismiss={() => {
           setSuccessUpdateLeaderVisible(false);
-          navigation.goBack();
+          navigation.navigate('LeaderManageStack');
         }}
       />
     </ScrollView>
