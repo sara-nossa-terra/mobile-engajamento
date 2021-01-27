@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
-import { Card, TextInput, Text, useTheme } from 'react-native-paper';
+import { View, StyleSheet, Text, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import { Card, TextInput, useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -26,11 +26,13 @@ interface SubmitFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  perfil: { value: number, label: string };
+  perfil: { value: number; label: string };
+  leaderSelected: { value: number; label: string };
 }
 
 const CreateLeader: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
+  const [leaderList, setLeaderList] = useState<Leader[]>([]);
 
   const [showsDatePicker, setShowsDatePicker] = useState<boolean>(false);
 
@@ -42,7 +44,45 @@ const CreateLeader: React.FC = () => {
   const theme = useTheme();
 
   useEffect(() => {
-    setLoading(false);
+    async function getRecursiveLeaders(leaderId: number, leaderList: Leader[] = []) {
+      const response = await api.get(`/v1/leaders/${leaderId}`);
+      const leader = response.data.data as Leader;
+
+      leaderList.push(leader);
+      if (leader.lider_id) {
+        await getRecursiveLeaders(leader.lider_id.id, leaderList);
+      }
+
+      return leaderList;
+    }
+
+    async function getAllLeaders() {
+      const response = await api.get('/v1/leaders');
+      const leaderList = response.data.data as Leader[];
+
+      return leaderList;
+    }
+
+    if (auth.isAdmin()) {
+      getAllLeaders()
+        .then(leaderList => {
+          setLeaderList(leaderList);
+          setLoading(false);
+        })
+        .catch(() => {
+          navigation.goBack();
+        });
+    } else {
+      getRecursiveLeaders(auth.user.id, [])
+        .then(leaderList => {
+          setLeaderList(leaderList);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.log(err);
+          navigation.goBack();
+        });
+    }
   }, []);
 
   // remove o toast de erro depois de 5 segundos
@@ -78,8 +118,19 @@ const CreateLeader: React.FC = () => {
     navigation.goBack();
   };
 
-  const onSubmit = ({ tx_nome, dt_nascimento, email, nu_telefone, password , perfil}: SubmitFormData) => {
+  const onSubmit = ({
+    tx_nome,
+    perfil,
+    password,
+    dt_nascimento,
+    email,
+    leaderSelected,
+    nu_telefone,
+  }: SubmitFormData) => {
+    if (!leaderSelected.value || !leaderSelected.label) return;
+
     const { dddPhoneNumber, phoneNumber } = separeDDDFromPhoneNumber(nu_telefone);
+    const lider_id = perfil.value === 1 ? null : leaderSelected.value;
 
     api
       .post('/v1/leaders', {
@@ -87,21 +138,23 @@ const CreateLeader: React.FC = () => {
         dt_nascimento,
         email: email.toLowerCase(),
         password,
-        lider_id: auth.user.id,
         nu_ddd: dddPhoneNumber,
         nu_telefone: phoneNumber,
-        perfil_id: perfil.value
+        perfil_id: perfil.value,
+        lider_id,
       })
-      .then(() => {
-         setSuccessToastVisible(true);
+      .then(err => {
+        setSuccessToastVisible(true);
       })
       .catch(() => {
-         setErrorToastVisible(true);
+        setErrorToastVisible(true);
       });
   };
 
   if (loading) return <AppLoading />;
 
+  const dropdownList = leaderList.map(l => ({ label: l.tx_nome, value: l.id }));
+  dropdownList.unshift({ label: 'Selecíone um líder', value: 0 });
   return (
     <ScrollView style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} enabled>
@@ -115,7 +168,8 @@ const CreateLeader: React.FC = () => {
             email: '',
             password: '',
             confirmPassword: '',
-            perfil: { value: 2, label: 'Líder'  }, // 1 para admin | 2 para líder
+            perfil: { value: 2, label: 'Líder' }, // 1 para admin | 2 para líder
+            leaderSelected: { value: 0, label: 'Selecione um líder' },
           }}
         >
           {({ values, touched, setFieldTouched, handleSubmit, handleChange, setFieldValue, handleBlur, errors }) => (
@@ -192,7 +246,9 @@ const CreateLeader: React.FC = () => {
 
               <Form title="CRIAR CONTA">
                 <Card.Content style={styles.cardContent}>
-                  <Text theme={theme} style={styles.label}>E-mail</Text>
+                  <Text theme={theme} style={styles.label}>
+                    E-mail
+                  </Text>
 
                   <Input
                     textContentType="emailAddress"
@@ -206,32 +262,67 @@ const CreateLeader: React.FC = () => {
                   />
                 </Card.Content>
 
-
                 {auth.isAdmin() && (
-                <Card.Content style={[styles.cardContent, { marginBottom: 5 }]}>
-                  <Text style={[styles.label, { marginBottom: 5 }]}>Tipo de usuário</Text>
+                  <Card.Content style={[styles.cardContent, { marginBottom: 5 }]}>
+                    <Text style={[styles.label, { marginBottom: 5 }]}>Tipo de usuário</Text>
 
-                  <DropDownPicker
-                    items={[{ value: 1, label: 'Administrador',  }, {  value: 2, label: 'Líder'}]}
-                    onChangeItem={item => setFieldValue('perfil', item || { value: 2, label: 'Líder' })}
-                    defaultValue={values.perfil.value || 2}
-                    multiple={false}
-                    containerStyle={{ height: 55, marginLeft: 5 }}
-                    itemStyle={{ justifyContent: 'flex-start' }}
-                    labelStyle={{ fontFamily: 'Montserrat_medium', fontSize: 12 }}
-                    placeholderStyle={{ color: AppColors.INPUT_DISABLE, fontFamily: 'Montserrat_medium', fontSize: 12 }}
-                    style={{
-                      borderTopLeftRadius: theme.roundness,
-                      borderTopRightRadius: theme.roundness,
-                      borderBottomLeftRadius: theme.roundness,
-                      borderBottomRightRadius: theme.roundness,
-                      borderColor: errors.perfil?.value ? theme.colors.error : theme.colors.disabled,
-                      borderWidth: errors.perfil?.value ? 2 : 1,
-                    }}
-                  />
-                </Card.Content>
-              )}
+                    <DropDownPicker
+                      items={[
+                        { value: 1, label: 'Administrador' },
+                        { value: 2, label: 'Líder' },
+                      ]}
+                      onChangeItem={item => setFieldValue('perfil', item || { value: 2, label: 'Líder' })}
+                      defaultValue={values.perfil.value || 2}
+                      multiple={false}
+                      containerStyle={{ height: 55, marginLeft: 5 }}
+                      itemStyle={{ justifyContent: 'flex-start' }}
+                      labelStyle={{ fontFamily: 'Montserrat_medium', fontSize: 12 }}
+                      placeholderStyle={{
+                        color: AppColors.INPUT_DISABLE,
+                        fontFamily: 'Montserrat_medium',
+                        fontSize: 12,
+                      }}
+                      style={{
+                        borderTopLeftRadius: theme.roundness,
+                        borderTopRightRadius: theme.roundness,
+                        borderBottomLeftRadius: theme.roundness,
+                        borderBottomRightRadius: theme.roundness,
+                        borderColor: errors.perfil?.value ? theme.colors.error : theme.colors.disabled,
+                        borderWidth: errors.perfil?.value ? 2 : 1,
+                      }}
+                    />
+                  </Card.Content>
+                )}
 
+                {/* Selecionar líder do líder em cadastro */}
+                {values.perfil.value === 2 && (
+                  <Card.Content style={[styles.cardContent, { marginBottom: 5 }]}>
+                    <Text style={[styles.label, { marginBottom: 5 }]}>Líder do usuário</Text>
+
+                    <DropDownPicker
+                      items={dropdownList}
+                      onChangeItem={item =>
+                        setFieldValue('leaderSelected', item || { value: 0, label: 'Selecione um líder' })
+                      }
+                      defaultValue={0}
+                      multiple={false}
+                      containerStyle={{ height: 55, marginLeft: 5 }}
+                      itemStyle={{ justifyContent: 'flex-start' }}
+                      labelStyle={{ fontFamily: 'Montserrat_medium', fontSize: 12 }}
+                      placeholderStyle={{
+                        color: AppColors.INPUT_DISABLE,
+                        fontFamily: 'Montserrat_medium',
+                        fontSize: 12,
+                      }}
+                      style={{
+                        borderTopLeftRadius: theme.roundness,
+                        borderTopRightRadius: theme.roundness,
+                        borderBottomLeftRadius: theme.roundness,
+                        borderBottomRightRadius: theme.roundness,
+                      }}
+                    />
+                  </Card.Content>
+                )}
 
                 <Card.Content style={styles.cardContent}>
                   <Text style={styles.label}>Senha</Text>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
-import { Card, TextInput, Text, useTheme } from 'react-native-paper';
+import { View, StyleSheet, Text, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import { Card, TextInput, useTheme } from 'react-native-paper';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInputMask } from 'react-native-masked-text';
@@ -27,6 +27,7 @@ interface SubmitFormData {
   password: string;
   confirmPassword: string;
   perfil: { label: string; value: number };
+  leaderSelected: { value: number; label: string };
 }
 
 const EditLeader: React.FC = () => {
@@ -34,6 +35,7 @@ const EditLeader: React.FC = () => {
   const [leader, setLeader] = useState<Leader>({} as Leader);
 
   const [showsDatePicker, setShowsDatePicker] = useState<boolean>(false);
+  const [leaderList, setLeaderList] = useState<Leader[]>([]);
 
   const [errorShowLeaderVisible, setErrorShowLeaderVisible] = useState<boolean>(false);
   const [errorUpdateLeaderVisible, setErrorUpdateLeaderVisible] = useState<boolean>(false);
@@ -47,13 +49,50 @@ const EditLeader: React.FC = () => {
   const { leaderId = 0 } = route.params as { leaderId: number };
 
   useEffect(() => {
+    async function getRecursiveLeaders(leaderId: number, leaderList: Leader[] = []) {
+      const response = await api.get(`/v1/leaders/${leaderId}`);
+      const leader = response.data.data as Leader;
+
+      leaderList.push(leader);
+      if (leader.lider_id) {
+        await getRecursiveLeaders(leader.lider_id.id, leaderList);
+      }
+
+      return leaderList;
+    }
+
+    async function getAllLeaders() {
+      const response = await api.get('/v1/leaders');
+      const leaderList = response.data.data as Leader[];
+
+      return leaderList;
+    }
+
     api
       .get(`/v1/leaders/${leaderId}`)
       .then(response => {
         const data = response.data.data as Leader;
-
         setLeader(data);
-        setLoading(false);
+
+        if (auth.isAdmin()) {
+          getAllLeaders()
+            .then(leaderList => {
+              setLeaderList(leaderList);
+              setLoading(false);
+            })
+            .catch(() => {
+              navigation.goBack();
+            });
+        } else {
+          getRecursiveLeaders(auth.user.id, [])
+            .then(leaderList => {
+              setLeaderList(leaderList);
+              setLoading(false);
+            })
+            .catch(err => {
+              navigation.goBack();
+            });
+        }
       })
       .catch(() => {
         navigation.navigate('LeaderManageStack');
@@ -96,16 +135,28 @@ const EditLeader: React.FC = () => {
     };
   }, [successUpdateLeaderVisible]);
 
-  const onSubmit = ({ email, nu_telefone, dt_nascimento, password, tx_nome, perfil }: SubmitFormData) => {
+  const onSubmit = ({
+    email,
+    nu_telefone,
+    dt_nascimento,
+    password,
+    tx_nome,
+    perfil,
+    leaderSelected,
+  }: SubmitFormData) => {
+    if (!leaderSelected.value || !leaderSelected.label) return;
+
     const { dddPhoneNumber, phoneNumber } = separeDDDFromPhoneNumber(nu_telefone);
+    const lider_id = perfil.value === 1 ? null : leaderSelected.value;
 
     const data = {
       tx_nome,
       dt_nascimento,
+      email,
       nu_ddd: dddPhoneNumber,
       nu_telefone: phoneNumber,
       perfil_id: perfil.value,
-      email,
+      lider_id,
     };
 
     if (password) {
@@ -130,8 +181,19 @@ const EditLeader: React.FC = () => {
     { value: 1, label: 'Administrador' },
     { value: 2, label: 'Líder' },
   ];
+
+  // dropdown de tipo de usuário
   dropdownItems = dropdownItems.filter(i => i.value != id);
   dropdownItems.unshift({ label: tx_nome, value: id });
+
+  // dropdown de selecionar o líder do usuário
+  const dropdownList = leaderList.map(l => ({ label: l.tx_nome, value: l.id }));
+  if (leader.lider_id) {
+    dropdownList.unshift({ label: 'Selecíone um líder', value: 0 });
+    dropdownList.unshift({ label: leader.lider_id.tx_nome, value: leader.lider_id.id });
+  } else {
+    dropdownList.unshift({ label: 'Selecíone um líder', value: 0 });
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -147,6 +209,7 @@ const EditLeader: React.FC = () => {
             password: '',
             confirmPassword: '',
             perfil: { label: tx_nome, value: id }, // 1 para admin | 2 para líder
+            leaderSelected: { label: dropdownList[0].label, value: dropdownList[0].value },
           }}
         >
           {({ values, touched, setFieldTouched, handleSubmit, handleChange, setFieldValue, handleBlur, errors }) => (
@@ -261,6 +324,36 @@ const EditLeader: React.FC = () => {
                         borderBottomRightRadius: theme.roundness,
                         borderColor: errors.perfil?.value ? theme.colors.error : theme.colors.disabled,
                         borderWidth: errors.perfil?.value ? 2 : 1,
+                      }}
+                    />
+                  </Card.Content>
+                )}
+
+                {/* Selecionar líder do líder em cadastro */}
+                {values.perfil.value === 2 && (
+                  <Card.Content style={[styles.cardContent, { marginBottom: 5 }]}>
+                    <Text style={[styles.label, { marginBottom: 5 }]}>Líder do usuário</Text>
+
+                    <DropDownPicker
+                      items={dropdownList}
+                      onChangeItem={item =>
+                        setFieldValue('leaderSelected', item || { value: 0, label: 'Selecione um líder' })
+                      }
+                      defaultValue={values.leaderSelected.value || 0}
+                      multiple={false}
+                      containerStyle={{ height: 55, marginLeft: 5 }}
+                      itemStyle={{ justifyContent: 'flex-start' }}
+                      labelStyle={{ fontFamily: 'Montserrat_medium', fontSize: 12 }}
+                      placeholderStyle={{
+                        color: AppColors.INPUT_DISABLE,
+                        fontFamily: 'Montserrat_medium',
+                        fontSize: 12,
+                      }}
+                      style={{
+                        borderTopLeftRadius: theme.roundness,
+                        borderTopRightRadius: theme.roundness,
+                        borderBottomLeftRadius: theme.roundness,
+                        borderBottomRightRadius: theme.roundness,
                       }}
                     />
                   </Card.Content>
