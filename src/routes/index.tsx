@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@hooks/Auth';
+import AppLoading from '@components/AppLoading';
 /**
  *
  * App navigator -> rotas de quando o usuário está autenticado na aplicação
@@ -11,9 +12,11 @@ import AuthNavigator from '@routes/Auth.routes';
 
 //Arquivo dedicado as configurações de navegação do aplicativo
 const Navigation: React.FC = () => {
-  const { token } = useAuth();
+  const { loading, token, user } = useAuth();
 
-  return token ? <AppNavigator /> : <AuthNavigator />;
+  if (loading) return <AppLoading />;
+
+  return token && user ? <AppNavigator /> : <AuthNavigator />;
 };
 
 export default Navigation;
